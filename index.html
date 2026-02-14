@@ -361,6 +361,77 @@
         .notification.success { border-left-color: #00cc00; }
         .notification.error { border-left-color: #ff4444; }
         
+        /* Mobile Support */
+        #mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                height: 100vh;
+                width: 85%;
+                max-width: 300px;
+                z-index: 1000;
+                box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.active-mobile {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 70px 20px 20px 20px;
+            }
+
+            #mobile-menu-btn {
+                display: block;
+            }
+
+            .notes-container {
+                flex-direction: column;
+                height: auto;
+            }
+            .notes-sidebar {
+                width: 100%;
+                height: 200px;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                margin-bottom: 15px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .company-header-info {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                text-align: right;
+                font-size: 11px;
+            }
+            .company-header-info span {
+                display: block;
+                margin: 0;
+            }
+        }
+
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
@@ -410,6 +481,7 @@
 
     <!-- Main Content -->
     <div class="main-content">
+        <button id="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
         
         <!-- Header Info -->
         <div class="company-header-info">
@@ -675,6 +747,22 @@
             if(sectionId === 'marketing') buttons[4].classList.add('active');
             if(sectionId === 'settings') buttons[5].classList.add('active');
             // Employee buttons logic handled by simple onclick in HTML for simplicity
+            
+            // Fecha menu mobile ao clicar
+            if(window.innerWidth <= 768) {
+                document.querySelectorAll('.sidebar').forEach(s => s.classList.remove('active-mobile'));
+            }
+        }
+
+        function toggleSidebar() {
+            const s1 = document.getElementById('owner-sidebar');
+            const s2 = document.getElementById('employee-sidebar');
+            
+            if (s2.style.display === 'flex') {
+                s2.classList.toggle('active-mobile');
+            } else {
+                s1.classList.toggle('active-mobile');
+            }
         }
 
         // --- Lógica de Vendas ---
