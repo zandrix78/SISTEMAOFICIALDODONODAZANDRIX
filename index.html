@@ -732,6 +732,9 @@
                 <button onclick="removeImages()" class="action-btn" style="padding: 5px 10px; font-size: 12px; background: #333; margin-bottom: 15px;">Remover Imagens</button>
 
                 <label>Sincronização (Backup / Restaurar)</label>
+                <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px; background: rgba(255, 204, 0, 0.1); padding: 10px; border-radius: 5px; border-left: 3px solid #ffcc00; color: #ffcc00;">
+                    ⚠️ <strong>Atenção:</strong> Como este sistema não usa servidor na nuvem, os dados ficam salvos <strong>apenas neste dispositivo</strong>. <br>Para transferir do Celular para o PC (ou vice-versa), clique em <strong>Exportar</strong> no dispositivo que tem os dados e depois em <strong>Importar</strong> no outro.
+                </p>
                 <div style="display: flex; gap: 10px; margin-bottom: 15px;">
                     <button class="action-btn" onclick="document.getElementById('import-file').click()" style="background-color: #008800; flex: 1;">📥 Importar</button>
                     <button class="action-btn" onclick="exportData()" style="background-color: #333; flex: 1;">📤 Exportar</button>
@@ -1237,6 +1240,20 @@
         function loadSettings() {
             let settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
             let needsSave = false;
+            
+            // Correção para acesso via Link (Mobile/Outros dispositivos)
+            // Adota o token da URL como válido para este dispositivo se estiver acessando via link
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+            const urlToken = urlParams.get('token');
+
+            if (mode === 'employee' && urlToken) {
+                settings.employeeToken = urlToken;
+                needsSave = true;
+            } else if (mode === 'socio' && urlToken) {
+                settings.socioToken = urlToken;
+                needsSave = true;
+            }
 
             if (!settings.employeeToken) {
                 settings.employeeToken = 'emp_' + Math.random().toString(36).substring(2, 15);
