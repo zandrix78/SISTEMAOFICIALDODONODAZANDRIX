@@ -731,8 +731,12 @@
                 
                 <button onclick="removeImages()" class="action-btn" style="padding: 5px 10px; font-size: 12px; background: #333; margin-bottom: 15px;">Remover Imagens</button>
 
-                <label>Exportar Dados</label>
-                <button class="action-btn" onclick="exportData()" style="background-color: #008800; margin-bottom: 15px;">📥 Baixar Relatório (CSV)</button>
+                <label>Sincronização (Backup / Restaurar)</label>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <button class="action-btn" onclick="document.getElementById('import-file').click()" style="background-color: #008800; flex: 1;">📥 Importar</button>
+                    <button class="action-btn" onclick="exportData()" style="background-color: #333; flex: 1;">📤 Exportar</button>
+                </div>
+                <input type="file" id="import-file" style="display: none;" onchange="importData(event)" accept=".json">
 
                 <label>Segurança da Equipe</label>
                 <div style="display: flex; gap: 10px; margin-bottom: 15px;">
@@ -791,6 +795,8 @@
             
             if (s2.style.display === 'flex') {
                 s2.classList.toggle('active-mobile');
+            } else if (s3.style.display === 'flex') {
+                s3.classList.toggle('active-mobile');
             } else {
                 s1.classList.toggle('active-mobile');
             }
@@ -1229,28 +1235,32 @@
 
         // --- Lógica de Configurações ---
         function loadSettings() {
-            const settings = JSON.parse(localStorage.getItem('zandrix_settings'));
-            if(settings) {
-                document.getElementById('conf-name').value = settings.name;
-                document.getElementById('conf-insta').value = settings.insta;
-                document.getElementById('conf-whats').value = settings.whats;
-                document.getElementById('conf-goal').value = settings.goal || '';
-                document.getElementById('conf-owner-name').value = settings.ownerName || '';
-                
-                // Garante que existe um token
-                if (!settings.employeeToken) {
-                    generateNewToken(false); // Gera sem avisar se não existir
-                }
-                document.getElementById('conf-token').value = settings.employeeToken || '...';
+            let settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
+            let needsSave = false;
 
-                // Garante que existe um token de sócio
-                if (!settings.socioToken) {
-                    generateNewSocioToken(false);
-                }
-                document.getElementById('conf-socio-token').value = settings.socioToken || '...';
-
-                applySettings(settings);
+            if (!settings.employeeToken) {
+                settings.employeeToken = 'emp_' + Math.random().toString(36).substring(2, 15);
+                needsSave = true;
             }
+            if (!settings.socioToken) {
+                settings.socioToken = 'soc_' + Math.random().toString(36).substring(2, 15);
+                needsSave = true;
+            }
+
+            if (needsSave) {
+                localStorage.setItem('zandrix_settings', JSON.stringify(settings));
+            }
+
+            // Agora, preenche o formulário com o objeto de configurações garantido
+            document.getElementById('conf-name').value = settings.name || 'Zandrix';
+            document.getElementById('conf-insta').value = settings.insta || '';
+            document.getElementById('conf-whats').value = settings.whats || '';
+            document.getElementById('conf-goal').value = settings.goal || '';
+            document.getElementById('conf-owner-name').value = settings.ownerName || '';
+            document.getElementById('conf-token').value = settings.employeeToken;
+            document.getElementById('conf-socio-token').value = settings.socioToken;
+            
+            applySettings(settings);
         }
 
         function saveSettings() {
@@ -1499,6 +1509,33 @@
             });
         }
 
+        // --- Importação e Exportação de Dados ---
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (confirm("Isso irá substituir TODOS os dados atuais por este backup. Deseja continuar?")) {
+                        if (data.sales) localStorage.setItem('zandrix_sales', JSON.stringify(data.sales));
+                        if (data.expenses) localStorage.setItem('zandrix_expenses', JSON.stringify(data.expenses));
+                        if (data.notes) localStorage.setItem('zandrix_notes_v2', JSON.stringify(data.notes));
+                        if (data.settings) localStorage.setItem('zandrix_settings', JSON.stringify(data.settings));
+
+                        showNotification("Dados importados! Recarregando o sistema...", "success");
+                        setTimeout(() => window.location.reload(), 1500);
+                    }
+                } catch (err) {
+                    showNotification("Erro: O arquivo de backup é inválido ou está corrompido.", "error");
+                }
+            };
+            reader.readAsText(file);
+            // Reset file input to allow importing the same file again
+            event.target.value = '';
+        }
+
         // --- Inicialização ---
         window.onload = function() {
             updateDashboard();
@@ -1573,10 +1610,64 @@
             }, 5000);
         }
 
+        function exportData() {
+            const allData = {
+                sales: JSON.parse(localStorage.getItem('zandrix_sales')) || [],
+                expenses: JSON.parse(localStorage.getItem('zandrix_expenses')) || [],
+                notes: JSON.parse(localStorage.getItem('zandrix_notes_v2')) || [],
+                settings: JSON.parse(localStorage.getItem('zandrix_settings')) || {}
+            };
+
+            const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `zandrix_backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification("Backup completo exportado com sucesso!", "success");
+        }
+
+    </script>
+</body>
+</html>
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
+
+        // --- Sistema de Notificações ---
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('notification-container');
+            const notif = document.createElement('div');
+            notif.className = `notification ${type}`;
+            notif.innerHTML = `
+                <div style="flex: 1;">${message}</div>
+                <button onclick="this.parentElement.remove()" style="background:none; border:none; color:#888; cursor:pointer; font-size:16px;">&times;</button>
+            `;
+            
+            container.appendChild(notif);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                notif.style.animation = 'slideOut 0.5s ease-in forwards';
+                setTimeout(() => notif.remove(), 500);
+            }, 5000);
+        }
+
         // --- Exportação de Dados ---
         function exportData() {
             const sales = JSON.parse(localStorage.getItem('zandrix_sales')) || [];
             const expenses = JSON.parse(localStorage.getItem('zandrix_expenses')) || [];
+            const allData = {
+                sales: JSON.parse(localStorage.getItem('zandrix_sales')) || [],
+                expenses: JSON.parse(localStorage.getItem('zandrix_expenses')) || [],
+                notes: JSON.parse(localStorage.getItem('zandrix_notes_v2')) || [],
+                settings: JSON.parse(localStorage.getItem('zandrix_settings')) || {}
+            };
 
             // Adiciona BOM para o Excel reconhecer acentos corretamente
             let csvContent = "\uFEFFTipo,Data,Descrição,Valor\n";
@@ -1592,15 +1683,18 @@
             });
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
             link.setAttribute("href", url);
             link.setAttribute("download", "zandrix_relatorio_financeiro.csv");
+            link.setAttribute("download", `zandrix_backup_${new Date().toISOString().split('T')[0]}.json`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             
             showNotification("Relatório exportado com sucesso!", "success");
+            showNotification("Backup completo exportado com sucesso!", "success");
         }
 
     </script>
