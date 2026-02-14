@@ -479,6 +479,27 @@
         <button class="nav-btn" onclick="showSection('notes')">📝 Anotações</button>
     </div>
 
+    <!-- Socio Sidebar (Hidden by default) -->
+    <div class="sidebar" id="socio-sidebar" style="display: none;">
+        <div class="profile-header">
+            <div id="socio-sidebar-banner" class="profile-banner"></div>
+            <img id="socio-sidebar-logo" class="profile-logo" src="https://via.placeholder.com/150" style="display: none;">
+        </div>
+        <div class="brand" id="socio-brand-display">ZANDRIX <br><span style="font-size:12px; color:white;">Área de Sócio</span></div>
+        
+        <div id="socio-owner-display-area" style="text-align: center; margin-bottom: 20px; display: none; animation: fadeIn 0.5s;">
+            <img id="socio-sidebar-owner-photo" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--primary-color); object-fit: cover; margin-bottom: 5px;">
+            <div id="socio-sidebar-owner-name" style="font-size: 14px; color: white; font-weight: bold;"></div>
+            <div style="font-size: 12px; color: var(--text-muted);">CEO / Fundador</div>
+        </div>
+
+        <button class="nav-btn active" onclick="showSection('dashboard')">📊 Dashboard</button>
+        <button class="nav-btn" onclick="showSection('notes')">📝 Anotações</button>
+        <button class="nav-btn" onclick="showSection('calculator')">🧮 Calculadora</button>
+        <button class="nav-btn" onclick="showSection('financial')">💰 Financeiro</button>
+        <button class="nav-btn" onclick="showSection('marketing')">📢 Marketing</button>
+    </div>
+
     <!-- Main Content -->
     <div class="main-content">
         <button id="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
@@ -722,6 +743,15 @@
                 <label>Acesso da Equipe</label>
                 <button class="action-btn" onclick="copyEmployeeLink()" style="background-color: #333; margin-bottom: 15px;">🔗 Copiar Link para Funcionários</button>
 
+                <label>Segurança dos Sócios</label>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" id="conf-socio-token" readonly style="margin-bottom: 0; background: #111; color: #888; font-family: monospace;" title="Token de Sócio atual">
+                    <button class="action-btn" onclick="generateNewSocioToken()" style="background-color: #550099; width: auto; padding: 12px;">🔄 Trocar Link</button>
+                </div>
+
+                <label>Acesso dos Sócios</label>
+                <button class="action-btn" onclick="copySocioLink()" style="background-color: #333; margin-bottom: 15px;">🔗 Copiar Link para Sócios</button>
+
                 <button class="action-btn" onclick="saveSettings()">Salvar Alterações</button>
             </div>
         </div>
@@ -757,6 +787,7 @@
         function toggleSidebar() {
             const s1 = document.getElementById('owner-sidebar');
             const s2 = document.getElementById('employee-sidebar');
+            const s3 = document.getElementById('socio-sidebar');
             
             if (s2.style.display === 'flex') {
                 s2.classList.toggle('active-mobile');
@@ -1211,6 +1242,13 @@
                     generateNewToken(false); // Gera sem avisar se não existir
                 }
                 document.getElementById('conf-token').value = settings.employeeToken || '...';
+
+                // Garante que existe um token de sócio
+                if (!settings.socioToken) {
+                    generateNewSocioToken(false);
+                }
+                document.getElementById('conf-socio-token').value = settings.socioToken || '...';
+
                 applySettings(settings);
             }
         }
@@ -1222,6 +1260,7 @@
             const goal = document.getElementById('conf-goal').value;
             const ownerName = document.getElementById('conf-owner-name').value;
             const token = document.getElementById('conf-token').value;
+            const socioToken = document.getElementById('conf-socio-token').value;
             const logoInput = document.getElementById('conf-logo-upload');
             const bannerInput = document.getElementById('conf-banner-upload');
             const ownerInput = document.getElementById('conf-owner-photo');
@@ -1250,6 +1289,7 @@
                     goal: goal,
                     ownerName: ownerName,
                     employeeToken: token,
+                    socioToken: socioToken,
                     logo: newLogo || currentSettings.logo,
                     banner: newBanner || currentSettings.banner,
                     ownerPhoto: newOwnerPhoto || currentSettings.ownerPhoto
@@ -1261,7 +1301,7 @@
         }
 
         function generateNewToken(notify = true) {
-            const newToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            const newToken = 'emp_' + Math.random().toString(36).substring(2, 15);
             document.getElementById('conf-token').value = newToken;
             
             // Salva imediatamente para garantir persistência
@@ -1270,6 +1310,18 @@
             localStorage.setItem('zandrix_settings', JSON.stringify(currentSettings));
             
             if(notify) showNotification("Novo link gerado! O link anterior foi invalidado.", "success");
+        }
+
+        function generateNewSocioToken(notify = true) {
+            const newToken = 'soc_' + Math.random().toString(36).substring(2, 15);
+            document.getElementById('conf-socio-token').value = newToken;
+            
+            // Salva imediatamente para garantir persistência
+            const currentSettings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
+            currentSettings.socioToken = newToken;
+            localStorage.setItem('zandrix_settings', JSON.stringify(currentSettings));
+            
+            if(notify) showNotification("Novo link de Sócio gerado! O link anterior foi invalidado.", "success");
         }
 
         function removeImages() {
@@ -1286,12 +1338,22 @@
         }
 
         function applySettings(data) {
-            if(data.name) document.getElementById('brand-display').innerText = data.name;
+            const socioBrandDisplay = document.getElementById('socio-brand-display');
+            if(data.name) {
+                document.getElementById('brand-display').innerText = data.name;
+                socioBrandDisplay.innerHTML = `${data.name} <br><span style="font-size:12px; color:white;">Área de Sócio</span>`;
+            }
             if(data.insta) document.getElementById('header-insta').innerText = data.insta;
             if(data.whats) document.getElementById('header-whats').innerText = data.whats;
             
             const sidebarLogo = document.getElementById('sidebar-logo');
             const sidebarBanner = document.getElementById('sidebar-banner');
+            const socioSidebarLogo = document.getElementById('socio-sidebar-logo');
+            const socioSidebarBanner = document.getElementById('socio-sidebar-banner');
+            const socioOwnerArea = document.getElementById('socio-owner-display-area');
+            const socioOwnerPhoto = document.getElementById('socio-sidebar-owner-photo');
+            const socioOwnerName = document.getElementById('socio-sidebar-owner-name');
+
             const sidebarOwnerArea = document.getElementById('owner-display-area');
             const sidebarOwnerPhoto = document.getElementById('sidebar-owner-photo');
             const sidebarOwnerName = document.getElementById('sidebar-owner-name');
@@ -1301,35 +1363,48 @@
             
             if(data.logo) {
                 sidebarLogo.src = data.logo;
+                socioSidebarLogo.src = data.logo;
                 sidebarLogo.style.display = 'block';
+                socioSidebarLogo.style.display = 'block';
                 previewLogo.src = data.logo;
                 previewLogo.style.display = 'block';
             } else {
                 sidebarLogo.style.display = 'none';
+                socioSidebarLogo.style.display = 'none';
                 previewLogo.style.display = 'none';
             }
 
             if(data.banner) {
                 sidebarBanner.style.backgroundImage = `url(${data.banner})`;
+                socioSidebarBanner.style.backgroundImage = `url(${data.banner})`;
                 previewBanner.style.backgroundImage = `url(${data.banner})`;
                 previewBanner.style.display = 'block';
             } else {
                 sidebarBanner.style.backgroundImage = 'none';
+                socioSidebarBanner.style.backgroundImage = 'none';
                 previewBanner.style.display = 'none';
             }
 
             // Lógica do Dono
             if(data.ownerName || data.ownerPhoto) {
                 sidebarOwnerArea.style.display = 'block';
+                socioOwnerArea.style.display = 'block';
                 sidebarOwnerName.innerText = data.ownerName || 'CEO';
+                socioOwnerName.innerText = data.ownerName || 'CEO';
                 if(data.ownerPhoto) {
                     sidebarOwnerPhoto.src = data.ownerPhoto;
+                    socioOwnerPhoto.src = data.ownerPhoto;
                     sidebarOwnerPhoto.style.display = 'inline-block';
+                    socioOwnerPhoto.style.display = 'inline-block';
                     previewOwner.src = data.ownerPhoto;
                     previewOwner.style.display = 'block';
                 } else {
                     sidebarOwnerPhoto.style.display = 'none';
+                    socioOwnerPhoto.style.display = 'none';
                 }
+            } else {
+                sidebarOwnerArea.style.display = 'none';
+                socioOwnerArea.style.display = 'none';
             }
         }
 
@@ -1360,9 +1435,15 @@
             const token = urlParams.get('token');
             const settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
 
-            if (mode === 'employee') {
-                // Validação do Token
-                if (settings.employeeToken && token !== settings.employeeToken) {
+            // 1. Reset to Owner View (default)
+            document.getElementById('owner-sidebar').style.display = 'flex';
+            document.getElementById('employee-sidebar').style.display = 'none';
+            document.getElementById('socio-sidebar').style.display = 'none';
+            document.querySelectorAll('.section').forEach(s => { s.style.display = '' }); // Reset display property
+
+            // 2. Apply restrictions based on mode
+            if (mode === 'employee') { // MODO FUNCIONÁRIO
+                if (!settings.employeeToken || token !== settings.employeeToken) {
                     document.body.innerHTML = `<div style="display:flex;justify-content:center;align-items:center;height:100vh;flex-direction:column;color:white;background:black;">
                         <h1 style="color:#ff4444">Acesso Negado</h1>
                         <p>Este link de funcionário expirou ou é inválido.</p>
@@ -1370,20 +1451,33 @@
                     </div>`;
                     return;
                 }
-
-                // Esconde sidebar do dono
                 document.getElementById('owner-sidebar').style.display = 'none';
-                // Mostra sidebar do funcionário
                 document.getElementById('employee-sidebar').style.display = 'flex';
-                
-                // Esconde seções sensíveis e mostra dashboard do funcionário
-                document.getElementById('dashboard').classList.remove('active');
-                document.getElementById('employee-dashboard').classList.add('active');
-                
-                // Remove acesso visual às seções proibidas (segurança visual)
-                document.getElementById('dashboard').remove();
-                document.getElementById('financial').remove();
-                document.getElementById('settings').remove();
+                // Hide forbidden sections
+                document.getElementById('dashboard').style.display = 'none';
+                document.getElementById('financial').style.display = 'none';
+                document.getElementById('settings').style.display = 'none';
+                showSection('employee-dashboard');
+
+            } else if (mode === 'socio') { // MODO SÓCIO
+                if (!settings.socioToken || token !== settings.socioToken) {
+                    document.body.innerHTML = `<div style="display:flex;justify-content:center;align-items:center;height:100vh;flex-direction:column;color:white;background:black;">
+                        <h1 style="color:#ff4444">Acesso Negado</h1>
+                        <p>Este link de sócio expirou ou é inválido.</p>
+                        <a href="${window.location.href.split('?')[0]}" style="color:var(--primary-color);margin-top:20px;">Voltar ao Início</a>
+                    </div>`;
+                    return;
+                }
+                document.getElementById('owner-sidebar').style.display = 'none';
+                document.getElementById('socio-sidebar').style.display = 'flex';
+                // Hide forbidden sections
+                document.getElementById('settings').style.display = 'none';
+                document.getElementById('employee-dashboard').style.display = 'none';
+                showSection('dashboard');
+
+            } else { // MODO DONO (PADRÃO)
+                document.getElementById('employee-dashboard').style.display = 'none';
+                showSection('dashboard');
             }
         }
 
@@ -1393,6 +1487,15 @@
             const url = window.location.href.split('?')[0] + '?mode=employee&token=' + token;
             navigator.clipboard.writeText(url).then(() => {
                 showNotification("Link de funcionário copiado!", "success");
+            });
+        }
+
+        function copySocioLink() {
+            const settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
+            const token = settings.socioToken || '';
+            const url = window.location.href.split('?')[0] + '?mode=socio&token=' + token;
+            navigator.clipboard.writeText(url).then(() => {
+                showNotification("Link de sócio copiado!", "success");
             });
         }
 
