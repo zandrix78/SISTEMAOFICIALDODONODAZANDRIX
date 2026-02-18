@@ -432,6 +432,14 @@
             }
         }
 
+        /* Role based visibility */
+        body.role-socio .owner-only {
+            display: none !important;
+        }
+        body.role-socio .socio-only {
+            display: block !important;
+        }
+
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
@@ -776,14 +784,7 @@
             document.getElementById(sectionId).classList.add('active');
             
             // Atualiza botão ativo
-            const buttons = document.querySelectorAll('.nav-btn');
-            if(sectionId === 'dashboard') buttons[0].classList.add('active');
-            if(sectionId === 'notes') buttons[1].classList.add('active');
-            if(sectionId === 'calculator') buttons[2].classList.add('active');
-            if(sectionId === 'financial') buttons[3].classList.add('active');
-            if(sectionId === 'marketing') buttons[4].classList.add('active');
-            if(sectionId === 'settings') buttons[5].classList.add('active');
-            // Employee buttons logic handled by simple onclick in HTML for simplicity
+            document.querySelectorAll(`.nav-btn[onclick="showSection('${sectionId}')"]`).forEach(btn => btn.classList.add('active'));
             
             // Fecha menu mobile ao clicar
             if(window.innerWidth <= 768) {
@@ -1247,10 +1248,10 @@
             const mode = urlParams.get('mode');
             const urlToken = urlParams.get('token');
 
-            if (mode === 'employee' && urlToken) {
+            if (mode === 'employee' && urlToken && !settings.employeeToken) {
                 settings.employeeToken = urlToken;
                 needsSave = true;
-            } else if (mode === 'socio' && urlToken) {
+            } else if (mode === 'socio' && urlToken && !settings.socioToken) {
                 settings.socioToken = urlToken;
                 needsSave = true;
             }
@@ -1466,6 +1467,7 @@
             document.getElementById('owner-sidebar').style.display = 'flex';
             document.getElementById('employee-sidebar').style.display = 'none';
             document.getElementById('socio-sidebar').style.display = 'none';
+            document.body.classList.remove('role-socio'); // Reset role class
             document.querySelectorAll('.section').forEach(s => { s.style.display = '' }); // Reset display property
 
             // 2. Apply restrictions based on mode
@@ -1474,6 +1476,7 @@
                     document.body.innerHTML = `<div style="display:flex;justify-content:center;align-items:center;height:100vh;flex-direction:column;color:white;background:black;">
                         <h1 style="color:#ff4444">Acesso Negado</h1>
                         <p>Este link de funcionário expirou ou é inválido.</p>
+                        <button onclick="localStorage.removeItem('zandrix_settings'); location.reload();" style="margin-top:15px; padding:10px; background:#333; color:white; border:none; cursor:pointer;">🔄 Atualizar Acesso (Limpar Cache)</button>
                         <a href="${window.location.href.split('?')[0]}" style="color:var(--primary-color);margin-top:20px;">Voltar ao Início</a>
                     </div>`;
                     return;
@@ -1491,12 +1494,14 @@
                     document.body.innerHTML = `<div style="display:flex;justify-content:center;align-items:center;height:100vh;flex-direction:column;color:white;background:black;">
                         <h1 style="color:#ff4444">Acesso Negado</h1>
                         <p>Este link de sócio expirou ou é inválido.</p>
+                        <button onclick="localStorage.removeItem('zandrix_settings'); location.reload();" style="margin-top:15px; padding:10px; background:#333; color:white; border:none; cursor:pointer;">🔄 Atualizar Acesso (Limpar Cache)</button>
                         <a href="${window.location.href.split('?')[0]}" style="color:var(--primary-color);margin-top:20px;">Voltar ao Início</a>
                     </div>`;
                     return;
                 }
                 document.getElementById('owner-sidebar').style.display = 'none';
                 document.getElementById('socio-sidebar').style.display = 'flex';
+                document.body.classList.add('role-socio'); // Add role class
                 // Hide forbidden sections
                 document.getElementById('settings').style.display = 'none';
                 document.getElementById('employee-dashboard').style.display = 'none';
