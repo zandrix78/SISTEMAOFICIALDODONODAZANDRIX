@@ -449,6 +449,45 @@
             to { transform: translateX(100%); opacity: 0; }
         }
 
+        /* Project Status Badges */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-pending { background: #555; color: #ccc; }
+        .status-dev { background: #0055aa; color: white; }
+        .status-done { background: #008800; color: white; }
+
+        /* Checklist Styles */
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #1a1a1a;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .checklist-item:hover { background: #252525; }
+        .checklist-item.checked { opacity: 0.5; text-decoration: line-through; }
+        .checklist-box {
+            width: 20px; height: 20px; border: 2px solid var(--primary-color); margin-right: 10px; display: flex; align-items: center; justify-content: center;
+        }
+        .checklist-item.checked .checklist-box::after {
+            content: '✔'; color: var(--primary-color); font-size: 14px;
+        }
+
+        /* Renewal Badges */
+        .renewal-badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        .renewal-ok { background: #008800; color: white; }
+        .renewal-warn { background: #ffcc00; color: black; }
+        .renewal-late { background: #ff4444; color: white; }
+        .renewal-days { font-size: 11px; color: #888; margin-left: 5px; }
+
     </style>
 </head>
 <body>
@@ -470,7 +509,12 @@
         </div>
 
         <button class="nav-btn active" onclick="showSection('dashboard')">📊 Dashboard</button>
+        <button class="nav-btn" onclick="showSection('projects')">🚀 Projetos</button>
+        <button class="nav-btn" onclick="showSection('renewals')">📅 Renovações</button>
+        <button class="nav-btn" onclick="showSection('checklist')">✅ Checklist</button>
         <button class="nav-btn" onclick="showSection('notes')">📝 Anotações</button>
+        <button class="nav-btn" onclick="showSection('invoices')">🧾 Recibos</button>
+        <button class="nav-btn" onclick="showSection('certificates')">🏆 Certificados</button>
         <button class="nav-btn" onclick="showSection('calculator')">🧮 Calculadora</button>
         <button class="nav-btn" onclick="showSection('financial')">💰 Financeiro</button>
         <button class="nav-btn" onclick="showSection('marketing')">📢 Marketing</button>
@@ -482,6 +526,7 @@
         <div class="brand">ZANDRIX <br><span style="font-size:12px; color:white;">Área da Equipe</span></div>
         
         <button class="nav-btn active" onclick="showSection('employee-dashboard')">💼 Vendas</button>
+        <button class="nav-btn" onclick="showSection('projects')">🚀 Projetos</button>
         <button class="nav-btn" onclick="showSection('marketing')">📢 Marketing</button>
         <button class="nav-btn" onclick="showSection('calculator')">🧮 Calculadora</button>
         <button class="nav-btn" onclick="showSection('notes')">📝 Anotações</button>
@@ -502,6 +547,8 @@
         </div>
 
         <button class="nav-btn active" onclick="showSection('dashboard')">📊 Dashboard</button>
+        <button class="nav-btn" onclick="showSection('projects')">🚀 Projetos</button>
+        <button class="nav-btn" onclick="showSection('renewals')">📅 Renovações</button>
         <button class="nav-btn" onclick="showSection('notes')">📝 Anotações</button>
         <button class="nav-btn" onclick="showSection('calculator')">🧮 Calculadora</button>
         <button class="nav-btn" onclick="showSection('financial')">💰 Financeiro</button>
@@ -586,6 +633,114 @@
                 <ul class="sales-list" id="sales-history">
                     <!-- Lista preenchida via JS -->
                 </ul>
+            </div>
+        </div>
+
+        <!-- Projects Section (NEW) -->
+        <div id="projects" class="section">
+            <h2>Gestão de Projetos (Sites)</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <label>Projetos Ativos</label>
+                    <div class="stat-value" id="active-projects-count">0</div>
+                </div>
+                <div class="stat-card" style="border-left-color: #0055aa;">
+                    <label style="color: #0055aa;">Em Desenvolvimento</label>
+                    <div class="stat-value" id="dev-projects-count">0</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <label>Novo Projeto</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <input type="text" id="proj-client" placeholder="Nome do Cliente">
+                    <input type="text" id="proj-name" placeholder="Tipo (Ex: Landing Page)">
+                    <input type="number" id="proj-value" placeholder="Valor (R$)">
+                    <input type="date" id="proj-deadline">
+                </div>
+                <select id="proj-status" style="width: 100%; padding: 12px; background: #000; color: white; border: 1px solid #333; border-radius: 5px; margin-bottom: 15px;">
+                    <option value="pending">⏳ Pendente / Aguardando Info</option>
+                    <option value="dev">👨‍💻 Em Desenvolvimento</option>
+                    <option value="done">✅ Concluído / Entregue</option>
+                </select>
+                <button class="action-btn" onclick="addProject()">➕ Adicionar Projeto</button>
+            </div>
+
+            <div class="card">
+                <label>Lista de Projetos</label>
+                <ul class="sales-list" id="projects-list">
+                    <!-- Lista via JS -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- Checklist Section (NEW) -->
+        <div id="checklist" class="section">
+            <h2>Checklist de Entrega (Go Live)</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Verifique estes itens antes de publicar o site do cliente.</p>
+            
+            <div class="card" id="checklist-container">
+                <!-- Itens gerados via JS -->
+            </div>
+            <button class="action-btn" onclick="resetChecklist()" style="background: #333; font-size: 12px;">🔄 Resetar Checklist</button>
+        </div>
+
+        <!-- Renewals Section (NEW) -->
+        <div id="renewals" class="section">
+            <h2>Renovações (Hospedagem/Domínio)</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <label>Receita Recorrente (Mensal)</label>
+                    <div class="stat-value" id="mrr-value">R$ 0.00</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <label>Nova Renovação</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <input type="text" id="ren-client" placeholder="Cliente">
+                    <input type="text" id="ren-service" placeholder="Serviço (Ex: Hospedagem)">
+                    <input type="number" id="ren-value" placeholder="Valor (R$)">
+                    <input type="date" id="ren-date">
+                </div>
+                <button class="action-btn" onclick="addRenewal()">➕ Agendar Renovação</button>
+            </div>
+
+            <div class="card">
+                <label>Próximos Vencimentos</label>
+                <ul class="sales-list" id="renewals-list"></ul>
+            </div>
+        </div>
+
+        <!-- Invoices Section (NEW) -->
+        <div id="invoices" class="section">
+            <h2>Gerador de Recibos</h2>
+            <div class="card">
+                <label>Dados do Recibo</label>
+                <input type="text" id="inv-client" placeholder="Nome do Cliente">
+                <input type="text" id="inv-service" placeholder="Descrição do Serviço (Ex: Criação de Site Institucional)">
+                <input type="number" id="inv-value" placeholder="Valor (R$)">
+                <input type="date" id="inv-date">
+                <button class="action-btn" onclick="generateInvoice()">🖨️ Gerar e Imprimir Recibo</button>
+            </div>
+            <p style="color: #888; font-size: 12px;">* Isso abrirá uma nova janela pronta para impressão ou salvar como PDF.</p>
+        </div>
+
+        <!-- Certificates Section (NEW) -->
+        <div id="certificates" class="section">
+            <h2>Gerador de Certificados (Reconhecimento)</h2>
+            <div class="card">
+                <label>Dados do Certificado</label>
+                <input type="text" id="cert-name" placeholder="Nome do Premiado (Funcionário/Sócio)">
+                <input type="text" id="cert-reason" placeholder="Motivo (Ex: Meta de Vendas Batida, Funcionário do Mês)">
+                <input type="date" id="cert-date">
+                <button class="action-btn" onclick="generateCertificate()" style="background: linear-gradient(45deg, #9d00ff, #ff00dd);">🏆 Gerar Certificado Oficial</button>
+            </div>
+            <p style="color: #888; font-size: 12px;">* Gera um certificado profissional com a logo da Zandrix pronto para imprimir.</p>
+            <div class="card" style="margin-top: 20px; border: 1px solid #ffd700;">
+                <label style="color: #ffd700;">Área do Dono</label>
+                <p style="color: #ccc; font-size: 14px; margin-bottom: 10px;">Gerar certificado de honra para o CEO <strong>Richard da Silva Campos</strong>.</p>
+                <button class="action-btn" onclick="generateOwnerCertificate()" style="background: linear-gradient(45deg, #ffd700, #b8860b); color: black; font-weight: bold;">👑 Gerar Certificado Supremo</button>
             </div>
         </div>
 
@@ -697,6 +852,13 @@
                     <h3 id="mkt-title" style="color: white; margin-bottom: 10px;"></h3>
                     <p id="mkt-desc" style="color: #ccc; font-size: 14px;"></p>
                 </div>
+            </div>
+
+            <div class="card">
+                <label>Gerador de Proposta Rápida (WhatsApp)</label>
+                <input type="text" id="prop-client-name" placeholder="Nome do Cliente">
+                <input type="text" id="prop-price" placeholder="Valor (Ex: 800,00)">
+                <button class="action-btn" onclick="generateProposal()">📝 Copiar Proposta</button>
             </div>
         </div>
 
@@ -1237,6 +1399,302 @@
             resDiv.style.display = 'block';
         }
 
+        function generateProposal() {
+            const name = document.getElementById('prop-client-name').value || "Cliente";
+            const price = document.getElementById('prop-price').value || "0,00";
+            
+            const text = `Olá ${name}, tudo bem? 👋\n\nAqui é da Zandrix! Analisei seu perfil e vi que podemos transformar seus resultados com um Site Profissional.\n\n🚀 *O que está incluso:*\n- Design Moderno e Responsivo (Celular/PC)\n- Botão de WhatsApp Integrado\n- Otimização para o Google (SEO)\n\n💰 *Investimento Especial:* De ~R$ 1.500~ por apenas *R$ ${price}* (Pagamento único).\n\nPodemos agendar o início?`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification("Proposta copiada! Cole no WhatsApp.", "success");
+            });
+        }
+
+        // --- Lógica de Renovações (NOVO) ---
+        let renewals = JSON.parse(localStorage.getItem('zandrix_renewals')) || [];
+
+        function loadRenewals() {
+            const list = document.getElementById('renewals-list');
+            list.innerHTML = '';
+            let mrr = 0;
+
+            // Ordenar por data
+            renewals.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            renewals.forEach(r => {
+                mrr += parseFloat(r.value);
+                const li = document.createElement('li');
+                
+                // Calcular dias restantes
+                const today = new Date();
+                const due = new Date(r.date);
+                const diffTime = due - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+                let badgeClass = 'renewal-ok';
+                let badgeText = 'Em dia';
+                
+                if (diffDays < 0) { badgeClass = 'renewal-late'; badgeText = 'ATRASADO'; }
+                else if (diffDays <= 7) { badgeClass = 'renewal-warn'; badgeText = 'Vence Logo'; }
+
+                li.innerHTML = `
+                    <div style="flex:1">
+                        <div style="font-weight:bold; color:white;">${r.client} <span class="renewal-badge ${badgeClass}">${badgeText}</span></div>
+                        <div style="font-size:12px; color:#aaa;">${r.service} - R$ ${parseFloat(r.value).toFixed(2)} <span class="renewal-days">(${diffDays} dias)</span></div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap: 10px;">
+                        <div style="font-size:12px; color:white;">${new Date(r.date).toLocaleDateString()}</div>
+                        <button onclick="deleteRenewal(${r.id})" style="background:none; border:none; cursor:pointer;">🗑️</button>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+
+            document.getElementById('mrr-value').innerText = `R$ ${mrr.toFixed(2)}`;
+        }
+
+        function addRenewal() {
+            const client = document.getElementById('ren-client').value;
+            const service = document.getElementById('ren-service').value;
+            const value = document.getElementById('ren-value').value;
+            const date = document.getElementById('ren-date').value;
+
+            if(client && value && date) {
+                renewals.push({ id: Date.now(), client, service, value, date });
+                localStorage.setItem('zandrix_renewals', JSON.stringify(renewals));
+                
+                document.getElementById('ren-client').value = '';
+                document.getElementById('ren-service').value = '';
+                document.getElementById('ren-value').value = '';
+                
+                loadRenewals();
+                showNotification("Renovação agendada!", "success");
+            } else {
+                showNotification("Preencha todos os campos.", "error");
+            }
+        }
+
+        function deleteRenewal(id) {
+            if(confirm("Remover esta renovação?")) {
+                renewals = renewals.filter(r => r.id !== id);
+                localStorage.setItem('zandrix_renewals', JSON.stringify(renewals));
+                loadRenewals();
+            }
+        }
+
+        // --- Lógica de Recibos (NOVO) ---
+        function generateInvoice() {
+            const client = document.getElementById('inv-client').value;
+            const service = document.getElementById('inv-service').value;
+            const value = document.getElementById('inv-value').value;
+            const date = document.getElementById('inv-date').value;
+            const settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
+            const myName = settings.name || "Zandrix Agency";
+
+            if(!client || !value) return showNotification("Preencha cliente e valor.", "error");
+
+            const win = window.open('', '', 'width=800,height=600');
+            win.document.write(`
+                <html><head><title>Recibo</title><style>body{font-family:sans-serif;padding:40px;max-width:700px;margin:0 auto;border:1px solid #ccc;margin-top:20px;} .header{text-align:center;margin-bottom:40px;border-bottom:2px solid #000;padding-bottom:20px;} h1{margin:0;} .row{display:flex;justify-content:space-between;margin-bottom:15px;} .box{background:#f0f0f0;padding:20px;margin:20px 0;} .footer{margin-top:50px;text-align:center;font-size:12px;}</style></head><body>
+                <div class="header"><h1>RECIBO DE PAGAMENTO</h1><p>${myName}</p></div>
+                <div class="row"><strong>Data:</strong> <span>${new Date(date || Date.now()).toLocaleDateString()}</span></div>
+                <div class="row"><strong>Cliente:</strong> <span>${client}</span></div>
+                <div class="box">
+                    <p>Recebemos a importância de <strong>R$ ${parseFloat(value).toFixed(2)}</strong></p>
+                    <p>Referente a: ${service}</p>
+                </div>
+                <div class="footer"><p>__________________________________<br>Assinatura / ${myName}</p></div>
+                <script>window.print();<\/script>
+                </body></html>
+            `);
+        }
+
+        // --- Lógica de Certificados (NOVO) ---
+        function printCertificate(name, reason, date, signerName) {
+            const logoUrl = 'https://i.imgur.com/w28Wu0f.png';
+            const win = window.open('', '', 'width=900,height=650');
+            win.document.write(`
+                <html>
+                <head>
+                    <title>Certificado - Zandrix</title>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Great+Vibes&family=Roboto:wght@300;400&display=swap');
+                        body { margin: 0; padding: 0; background: #f0f0f0; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Roboto', sans-serif; }
+                        .certificate {
+                            width: 800px; height: 550px; background: #fff; padding: 40px;
+                            border: 10px solid #9d00ff;
+                            position: relative; text-align: center; box-shadow: 0 0 20px rgba(0,0,0,0.2);
+                            background-image: radial-gradient(circle at center, rgba(157, 0, 255, 0.03) 0%, rgba(255,255,255,1) 70%);
+                        }
+                        .inner-border {
+                            border: 2px solid #333; height: 100%; width: 100%; box-sizing: border-box; position: relative;
+                            display: flex; flex-direction: column; justify-content: center; align-items: center;
+                        }
+                        .logo { width: 100px; margin-bottom: 20px; }
+                        h1 { font-family: 'Cinzel', serif; font-size: 48px; color: #333; margin: 10px 0; text-transform: uppercase; letter-spacing: 4px; }
+                        .subtitle { font-size: 18px; color: #666; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; }
+                        .present-to { font-size: 16px; color: #888; margin-bottom: 10px; font-style: italic; }
+                        .name { font-family: 'Great Vibes', cursive; font-size: 60px; color: #9d00ff; margin: 10px 0 30px 0; border-bottom: 1px solid #ddd; padding: 0 40px; display: inline-block; }
+                        .reason { font-size: 20px; color: #444; max-width: 80%; line-height: 1.5; margin-bottom: 40px; }
+                        .footer { display: flex; justify-content: space-around; width: 100%; margin-top: 40px; }
+                        .sig-line { border-top: 1px solid #333; width: 200px; padding-top: 10px; font-weight: bold; color: #333; }
+                        .date { font-size: 14px; color: #666; }
+                        @media print {
+                            body { background: none; -webkit-print-color-adjust: exact; }
+                            .certificate { box-shadow: none; margin: 0; page-break-inside: avoid; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="certificate">
+                        <div class="inner-border">
+                            <img src="${logoUrl}" class="logo" alt="Zandrix Logo">
+                            <h1>Certificado</h1>
+                            <div class="subtitle">de Reconhecimento</div>
+                            <div class="present-to">Este certificado é orgulhosamente concedido a</div>
+                            <div class="name">${name}</div>
+                            <div class="reason">Por sua dedicação e excelente desempenho ao alcançar:<br><strong>${reason}</strong></div>
+                            <div class="footer">
+                                <div><div class="date">${new Date(date || Date.now()).toLocaleDateString()}</div><div class="sig-line">Data</div></div>
+                                <div><div class="date" style="font-family:'Great Vibes'; font-size:24px;">${signerName}</div><div class="sig-line">Assinatura</div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <script>setTimeout(() => { window.print(); }, 1000);<\/script>
+                </body>
+                </html>
+            `);
+        }
+
+        function generateCertificate() {
+            const name = document.getElementById('cert-name').value;
+            const reason = document.getElementById('cert-reason').value;
+            const date = document.getElementById('cert-date').value;
+            const settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
+            const ownerName = settings.ownerName || "CEO Zandrix";
+
+            if(!name || !reason) return showNotification("Preencha nome e motivo.", "error");
+            printCertificate(name, reason, date, ownerName);
+        }
+
+        function generateOwnerCertificate() {
+            printCertificate("Richard da Silva Campos", "Excelência em Liderança e Visão Estratégica", new Date().toISOString().split('T')[0], "Equipe Zandrix");
+        }
+
+        // --- Lógica de Projetos (NOVO) ---
+        let projects = JSON.parse(localStorage.getItem('zandrix_projects')) || [];
+
+        function loadProjects() {
+            const list = document.getElementById('projects-list');
+            list.innerHTML = '';
+            
+            let activeCount = 0;
+            let devCount = 0;
+
+            projects.forEach(p => {
+                if(p.status !== 'done') activeCount++;
+                if(p.status === 'dev') devCount++;
+
+                const li = document.createElement('li');
+                let badgeClass = 'status-pending';
+                let badgeText = 'Pendente';
+                
+                if(p.status === 'dev') { badgeClass = 'status-dev'; badgeText = 'Em Dev'; }
+                if(p.status === 'done') { badgeClass = 'status-done'; badgeText = 'Concluído'; }
+
+                li.innerHTML = `
+                    <div style="flex:1">
+                        <div style="font-weight:bold; color:white;">${p.client} <span style="font-weight:normal; color:#888; font-size:12px;">(${p.type})</span></div>
+                        <div style="font-size:12px; color:#aaa;">Prazo: ${p.deadline ? new Date(p.deadline).toLocaleDateString() : 'Sem data'} | Valor: R$ ${parseFloat(p.value).toFixed(2)}</div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap: 10px;">
+                        <span class="status-badge ${badgeClass}">${badgeText}</span>
+                        <button onclick="deleteProject(${p.id})" style="background:none; border:none; cursor:pointer;">🗑️</button>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+
+            document.getElementById('active-projects-count').innerText = activeCount;
+            document.getElementById('dev-projects-count').innerText = devCount;
+        }
+
+        function addProject() {
+            const client = document.getElementById('proj-client').value;
+            const type = document.getElementById('proj-name').value;
+            const value = document.getElementById('proj-value').value;
+            const deadline = document.getElementById('proj-deadline').value;
+            const status = document.getElementById('proj-status').value;
+
+            if(client && value) {
+                projects.push({
+                    id: Date.now(),
+                    client, type, value, deadline, status
+                });
+                localStorage.setItem('zandrix_projects', JSON.stringify(projects));
+                
+                // Limpar campos
+                document.getElementById('proj-client').value = '';
+                document.getElementById('proj-name').value = '';
+                document.getElementById('proj-value').value = '';
+                
+                loadProjects();
+                showNotification("Projeto adicionado!", "success");
+            } else {
+                showNotification("Preencha nome do cliente e valor.", "error");
+            }
+        }
+
+        function deleteProject(id) {
+            if(confirm("Remover este projeto?")) {
+                projects = projects.filter(p => p.id !== id);
+                localStorage.setItem('zandrix_projects', JSON.stringify(projects));
+                loadProjects();
+            }
+        }
+
+        // --- Lógica de Checklist (NOVO) ---
+        const defaultChecklist = [
+            "Verificar Responsividade (Mobile/Tablet)",
+            "Testar Formulário de Contato",
+            "Instalar Certificado SSL (Cadeado)",
+            "Configurar Favicon (Ícone da aba)",
+            "Otimizar Imagens (TinyPNG)",
+            "Verificar Links Quebrados",
+            "Configurar SEO (Título e Descrição)",
+            "Testar Botão do WhatsApp",
+            "Backup Inicial Realizado"
+        ];
+        let checklistState = JSON.parse(localStorage.getItem('zandrix_checklist')) || {};
+
+        function loadChecklist() {
+            const container = document.getElementById('checklist-container');
+            container.innerHTML = '';
+            
+            defaultChecklist.forEach((item, index) => {
+                const isChecked = checklistState[index] ? 'checked' : '';
+                const div = document.createElement('div');
+                div.className = `checklist-item ${isChecked}`;
+                div.onclick = () => toggleChecklist(index);
+                div.innerHTML = `<div class="checklist-box"></div> ${item}`;
+                container.appendChild(div);
+            });
+        }
+
+        function toggleChecklist(index) {
+            checklistState[index] = !checklistState[index];
+            localStorage.setItem('zandrix_checklist', JSON.stringify(checklistState));
+            loadChecklist();
+        }
+
+        function resetChecklist() {
+            if(confirm("Limpar todas as marcações?")) {
+                checklistState = {};
+                localStorage.setItem('zandrix_checklist', JSON.stringify(checklistState));
+                loadChecklist();
+            }
+        }
+
         // --- Lógica de Configurações ---
         function loadSettings() {
             let settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
@@ -1544,6 +2002,8 @@
                         if (data.sales) localStorage.setItem('zandrix_sales', JSON.stringify(data.sales));
                         if (data.expenses) localStorage.setItem('zandrix_expenses', JSON.stringify(data.expenses));
                         if (data.notes) localStorage.setItem('zandrix_notes_v2', JSON.stringify(data.notes));
+                        if (data.projects) localStorage.setItem('zandrix_projects', JSON.stringify(data.projects));
+                        if (data.renewals) localStorage.setItem('zandrix_renewals', JSON.stringify(data.renewals));
                         if (data.settings) localStorage.setItem('zandrix_settings', JSON.stringify(data.settings));
 
                         showNotification("Dados importados! Recarregando o sistema...", "success");
@@ -1563,6 +2023,9 @@
             updateDashboard();
             updateExpensesList();
             loadNotes();
+            loadProjects();
+            loadRenewals();
+            loadChecklist();
             loadSettings();
             initParticles();
             checkMode(); // Verifica se é funcionário
@@ -1575,33 +2038,38 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
 
+            const logoImg = new Image();
+            logoImg.src = 'https://i.imgur.com/w28Wu0f.png';
+
             let particles = [];
-            const particleCount = 100;
+            const particleCount = 50;
 
             for (let i = 0; i < particleCount; i++) {
                 particles.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
-                    speed: Math.random() * 2 + 0.5,
-                    size: Math.random() * 2 + 1
+                    speed: Math.random() * 1 + 0.5,
+                    size: Math.random() * 30 + 20,
+                    opacity: Math.random() * 0.5 + 0.1
                 });
             }
 
             function animate() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = 'rgba(157, 0, 255, 0.6)'; // Roxo Neon
 
-                particles.forEach(p => {
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    ctx.fill();
+                if (logoImg.complete) {
+                    particles.forEach(p => {
+                        ctx.globalAlpha = p.opacity;
+                        ctx.drawImage(logoImg, p.x, p.y, p.size, p.size);
 
-                    p.y += p.speed;
-                    if (p.y > canvas.height) {
-                        p.y = 0;
+                        p.y -= p.speed;
+                        if (p.y < -50) {
+                            p.y = canvas.height;
                         p.x = Math.random() * canvas.width;
                     }
                 });
+                    ctx.globalAlpha = 1.0;
+                }
 
                 requestAnimationFrame(animate);
             }
@@ -1637,6 +2105,8 @@
                 sales: JSON.parse(localStorage.getItem('zandrix_sales')) || [],
                 expenses: JSON.parse(localStorage.getItem('zandrix_expenses')) || [],
                 notes: JSON.parse(localStorage.getItem('zandrix_notes_v2')) || [],
+                projects: JSON.parse(localStorage.getItem('zandrix_projects')) || [],
+                renewals: JSON.parse(localStorage.getItem('zandrix_renewals')) || [],
                 settings: JSON.parse(localStorage.getItem('zandrix_settings')) || {}
             };
 
