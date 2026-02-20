@@ -39,7 +39,14 @@
             display: flex;
             flex-direction: column;
             padding: 20px;
+            overflow-y: auto; /* Permite rolar o menu se for muito grande */
+            padding-bottom: 100px; /* Espaço para os botões de rolagem não cobrirem o menu */
         }
+
+        /* Estilo da Barra de Rolagem do Menu (Discreta) */
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: #000; }
+        .sidebar::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         
         /* Particle Background */
         #particles-canvas {
@@ -114,6 +121,22 @@
             flex: 1;
             padding: 30px;
             overflow-y: auto;
+            height: 100vh; 
+            height: 100dvh; /* Melhor ajuste para celular (barra de endereço) */
+            -webkit-overflow-scrolling: touch; /* Garante rolagem suave no iPhone/Android */
+            padding-bottom: 100px; /* Espaço extra no final para nada ficar escondido */
+        }
+
+        /* Estilo da Barra de Rolagem (Scrollbar) */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color); 
+            border-radius: 4px;
         }
 
         .section {
@@ -487,6 +510,23 @@
         .renewal-warn { background: #ffcc00; color: black; }
         .renewal-late { background: #ff4444; color: white; }
         .renewal-days { font-size: 11px; color: #888; margin-left: 5px; }
+
+        /* Scroll Controls (Desktop Only) */
+        .scroll-controls {
+            position: fixed;
+            bottom: 30px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 999;
+        }
+        .scroll-btn {
+            background: rgba(157, 0, 255, 0.6); color: white; border: 1px solid var(--primary-color); width: 50px; height: 50px; border-radius: 50%; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; backdrop-filter: blur(5px);
+        }
+        .scroll-btn:hover { background: var(--primary-color); box-shadow: 0 0 15px var(--primary-color); transform: scale(1.1); }
+        
+        @media (max-width: 768px) { .scroll-controls { display: none; } }
 
     </style>
 </head>
@@ -933,6 +973,12 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- Scroll Controls -->
+    <div class="scroll-controls">
+        <button class="scroll-btn" onclick="scrollPage('up')">▲</button>
+        <button class="scroll-btn" onclick="scrollPage('down')">▼</button>
     </div>
 
     <script>
@@ -2120,6 +2166,20 @@
             document.body.removeChild(link);
             
             showNotification("Backup completo exportado com sucesso!", "success");
+        }
+
+        // --- Controle de Rolagem (Setinhas) ---
+        function scrollPage(direction) {
+            // Encontrar a sidebar visível para rolar o menu
+            const sidebars = document.querySelectorAll('.sidebar');
+            let activeSidebar = null;
+            sidebars.forEach(s => {
+                if (window.getComputedStyle(s).display !== 'none') activeSidebar = s;
+            });
+
+            const amount = 100;
+            if (activeSidebar && direction === 'up') activeSidebar.scrollBy({ top: -amount, behavior: 'smooth' });
+            else if (activeSidebar) activeSidebar.scrollBy({ top: amount, behavior: 'smooth' });
         }
 
     </script>
