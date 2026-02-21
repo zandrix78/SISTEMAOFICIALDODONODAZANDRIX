@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zandrix SaaS Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src='https://meet.jit.si/external_api.js'></script>
     <style>
         :root {
             --primary-color: #9d00ff; /* Roxo Neon */
@@ -183,7 +184,7 @@
             font-weight: bold;
         }
 
-        input, textarea {
+        input, textarea, select {
             width: 100%;
             padding: 12px;
             background-color: #000;
@@ -194,7 +195,7 @@
             transition: 0.3s;
         }
 
-        input:focus, textarea:focus {
+        input:focus, textarea:focus, select:focus {
             outline: none;
             border-color: var(--primary-color);
             box-shadow: 0 0 5px var(--primary-color);
@@ -550,10 +551,13 @@
 
         <button class="nav-btn active" onclick="showSection('dashboard')">📊 Dashboard</button>
         <button class="nav-btn" onclick="showSection('projects')">🚀 Projetos</button>
+        <button class="nav-btn" onclick="showSection('crm')">👥 Clientes (CRM)</button>
+        <button class="nav-btn" onclick="showSection('meetings')">📹 Reuniões</button>
         <button class="nav-btn" onclick="showSection('renewals')">📅 Renovações</button>
         <button class="nav-btn" onclick="showSection('checklist')">✅ Checklist</button>
         <button class="nav-btn" onclick="showSection('notes')">📝 Anotações</button>
         <button class="nav-btn" onclick="showSection('invoices')">🧾 Recibos</button>
+        <button class="nav-btn" onclick="showSection('contracts')">📜 Contratos</button>
         <button class="nav-btn" onclick="showSection('certificates')">🏆 Certificados</button>
         <button class="nav-btn" onclick="showSection('calculator')">🧮 Calculadora</button>
         <button class="nav-btn" onclick="showSection('financial')">💰 Financeiro</button>
@@ -567,6 +571,8 @@
         
         <button class="nav-btn active" onclick="showSection('employee-dashboard')">💼 Vendas</button>
         <button class="nav-btn" onclick="showSection('projects')">🚀 Projetos</button>
+        <button class="nav-btn" onclick="showSection('meetings')">📹 Reuniões</button>
+        <button class="nav-btn" onclick="showSection('crm')">👥 Clientes (CRM)</button>
         <button class="nav-btn" onclick="showSection('marketing')">📢 Marketing</button>
         <button class="nav-btn" onclick="showSection('calculator')">🧮 Calculadora</button>
         <button class="nav-btn" onclick="showSection('notes')">📝 Anotações</button>
@@ -588,8 +594,11 @@
 
         <button class="nav-btn active" onclick="showSection('dashboard')">📊 Dashboard</button>
         <button class="nav-btn" onclick="showSection('projects')">🚀 Projetos</button>
+        <button class="nav-btn" onclick="showSection('crm')">👥 Clientes (CRM)</button>
+        <button class="nav-btn" onclick="showSection('meetings')">📹 Reuniões</button>
         <button class="nav-btn" onclick="showSection('renewals')">📅 Renovações</button>
         <button class="nav-btn" onclick="showSection('notes')">📝 Anotações</button>
+        <button class="nav-btn" onclick="showSection('contracts')">📜 Contratos</button>
         <button class="nav-btn" onclick="showSection('calculator')">🧮 Calculadora</button>
         <button class="nav-btn" onclick="showSection('financial')">💰 Financeiro</button>
         <button class="nav-btn" onclick="showSection('marketing')">📢 Marketing</button>
@@ -781,6 +790,102 @@
                 <label style="color: #ffd700;">Área do Dono</label>
                 <p style="color: #ccc; font-size: 14px; margin-bottom: 10px;">Gerar certificado de honra para o CEO <strong>Richard da Silva Campos</strong>.</p>
                 <button class="action-btn" onclick="generateOwnerCertificate()" style="background: linear-gradient(45deg, #ffd700, #b8860b); color: black; font-weight: bold;">👑 Gerar Certificado Supremo</button>
+            </div>
+        </div>
+
+        <!-- CRM Section (NEW) -->
+        <div id="crm" class="section">
+            <h2>Gestão de Clientes (CRM)</h2>
+            <div class="card">
+                <label>Novo Cliente</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <input type="text" id="crm-name" placeholder="Nome do Cliente / Empresa">
+                    <input type="text" id="crm-whats" placeholder="WhatsApp (apenas números)">
+                    <input type="text" id="crm-email" placeholder="Email">
+                    <select id="crm-status">
+                        <option value="lead">Prospect / Lead</option>
+                        <option value="active">Cliente Ativo</option>
+                        <option value="inactive">Inativo</option>
+                    </select>
+                </div>
+                <button class="action-btn" onclick="addClient()">💾 Salvar Cliente</button>
+            </div>
+
+            <div class="card">
+                <label>Carteira de Clientes</label>
+                <ul class="sales-list" id="crm-list">
+                    <!-- Lista via JS -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- Contracts Section (NEW) -->
+        <div id="contracts" class="section">
+            <h2>Gerador de Contratos</h2>
+            <div class="card">
+                <label>Dados do Contrato</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <input type="text" id="ctr-client" placeholder="Nome do Cliente / Razão Social">
+                    <input type="text" id="ctr-doc" placeholder="CPF ou CNPJ do Cliente">
+                    <input type="text" id="ctr-service" placeholder="Descrição do Serviço (ex: Site Institucional)">
+                    <input type="text" id="ctr-value" placeholder="Valor Total (R$)">
+                    <input type="text" id="ctr-entry" placeholder="Valor da Entrada (R$)">
+                    <input type="text" id="ctr-deadline" placeholder="Prazo de Entrega (dias)">
+                </div>
+                <button class="action-btn" onclick="generateContract()">📄 Gerar Contrato de Prestação de Serviços</button>
+            </div>
+        </div>
+
+        <!-- Meetings Section (NEW) -->
+        <div id="meetings" class="section">
+            <h2>Sala de Reuniões Zandrix</h2>
+            
+            <!-- Área do Dono: Controle da Sala -->
+            <div class="card owner-only" id="meeting-admin-panel">
+                <label>Configuração da Sala</label>
+                <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Este é o link único da reunião. Envie para sua equipe. Eles colocarão o nome e foto ao entrar.</p>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" id="meeting-url-display" readonly style="background: #111; color: var(--primary-color); font-weight: bold;">
+                    <button class="action-btn" onclick="copyMeetingLink()" style="width: auto;">🔗 Copiar</button>
+                </div>
+
+                <label style="color: #ff4444;">Segurança / Banimento</label>
+                <p style="color: #aaa; font-size: 12px; margin-bottom: 10px;">Se precisar expulsar alguém ou impedir o acesso, gere uma nova sala. O link antigo deixará de funcionar imediatamente.</p>
+                <button class="action-btn" onclick="generateNewMeetingRoom()" style="background: #ff4444;">🔄 Gerar Nova Sala (Invalidar Link Antigo)</button>
+            </div>
+
+            <!-- Área de Perfil do Usuário (Para todos personalizarem antes de entrar) -->
+            <div class="card" id="meeting-lobby">
+                <label>Seu Perfil para a Reunião</label>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <div style="text-align: center;">
+                        <img id="meet-preview-avatar" src="https://i.imgur.com/w28Wu0f.png" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color);">
+                        <button onclick="document.getElementById('meet-upload-avatar').click()" style="background: #333; border: none; color: white; font-size: 10px; padding: 5px; margin-top: 5px; cursor: pointer; border-radius: 3px;">📷 Trocar Foto</button>
+                        <input type="file" id="meet-upload-avatar" accept="image/*" style="display: none;" onchange="updateMeetingAvatar(this)">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 12px; margin-bottom: 5px;">Seu Nome na Sala:</label>
+                        <input type="text" id="meet-display-name" placeholder="Digite seu nome aqui...">
+                    </div>
+                </div>
+                <button class="action-btn" onclick="startMeeting()" id="btn-join-meet" style="width: 100%; margin-top: 15px;">🎥 Entrar na Reunião</button>
+            </div>
+
+            <!-- Área de Reunião (Para todos) -->
+            <div class="card" id="meeting-active-area" style="display: none;">
+                <label>Reunião em Andamento</label>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <button class="action-btn" onclick="toggleScreenShare()" style="background: #0055aa; flex: 1;">🖥️ Compartilhar Tela</button>
+                    <button class="action-btn" onclick="leaveMeeting()" style="background: #333; flex: 1;">❌ Sair</button>
+                </div>
+                
+                <!-- Container do Jitsi -->
+                <div id="jitsi-container" style="width: 100%; height: 600px; background: #000; border-radius: 10px; border: 1px solid #333;">
+                    <div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #666;">
+                        Aguardando conexão...
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1630,6 +1735,230 @@
             printCertificate("Richard da Silva Campos", "Excelência em Liderança e Visão Estratégica", new Date().toISOString().split('T')[0], "Equipe Zandrix");
         }
 
+        // --- Lógica de CRM (NOVO) ---
+        let clients = JSON.parse(localStorage.getItem('zandrix_clients')) || [];
+
+        function loadClients() {
+            const list = document.getElementById('crm-list');
+            list.innerHTML = '';
+            
+            clients.forEach(c => {
+                const li = document.createElement('li');
+                let statusColor = '#888';
+                let statusText = 'Inativo';
+                if(c.status === 'lead') { statusColor = '#ffcc00'; statusText = 'Lead'; }
+                if(c.status === 'active') { statusColor = '#00cc00'; statusText = 'Ativo'; }
+
+                li.innerHTML = `
+                    <div style="flex:1">
+                        <div style="font-weight:bold; color:white;">${c.name} <span style="font-size:10px; background:${statusColor}; color:black; padding:2px 5px; border-radius:3px;">${statusText}</span></div>
+                        <div style="font-size:12px; color:#aaa;">
+                            ${c.whats ? `<a href="https://wa.me/55${c.whats}" target="_blank" style="color:var(--primary-color); text-decoration:none;">📱 WhatsApp</a>` : ''} 
+                            ${c.email ? `| 📧 ${c.email}` : ''}
+                        </div>
+                    </div>
+                    <button onclick="deleteClient(${c.id})" style="background:none; border:none; cursor:pointer;">🗑️</button>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function addClient() {
+            const name = document.getElementById('crm-name').value;
+            const whats = document.getElementById('crm-whats').value;
+            const email = document.getElementById('crm-email').value;
+            const status = document.getElementById('crm-status').value;
+
+            if(name) {
+                clients.push({ id: Date.now(), name, whats, email, status });
+                localStorage.setItem('zandrix_clients', JSON.stringify(clients));
+                
+                document.getElementById('crm-name').value = '';
+                document.getElementById('crm-whats').value = '';
+                document.getElementById('crm-email').value = '';
+                
+                loadClients();
+                showNotification("Cliente salvo!", "success");
+            } else {
+                showNotification("Nome é obrigatório.", "error");
+            }
+        }
+
+        function deleteClient(id) {
+            if(confirm("Remover cliente?")) {
+                clients = clients.filter(c => c.id !== id);
+                localStorage.setItem('zandrix_clients', JSON.stringify(clients));
+                loadClients();
+            }
+        }
+
+        // --- Lógica de Reuniões (NOVO) ---
+        let jitsiApi = null;
+
+        function loadMeetingSettings() {
+            const settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
+            
+            // Se não tiver ID de sala, cria um
+            if (!settings.meetingRoomId) {
+                settings.meetingRoomId = 'ZandrixRoom_' + Math.random().toString(36).substring(2, 10);
+                localStorage.setItem('zandrix_settings', JSON.stringify(settings));
+            }
+
+            // Monta o link
+            const link = `${window.location.href.split('?')[0]}?meetingId=${settings.meetingRoomId}`;
+            document.getElementById('meeting-url-display').value = link;
+        }
+
+        function generateNewMeetingRoom() {
+            if(confirm("Tem certeza? Isso vai expulsar todos da sala atual e o link antigo deixará de funcionar.")) {
+                const settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
+                settings.meetingRoomId = 'ZandrixRoom_' + Math.random().toString(36).substring(2, 10);
+                localStorage.setItem('zandrix_settings', JSON.stringify(settings));
+                
+                loadMeetingSettings();
+                showNotification("Nova sala gerada! Envie o novo link.", "success");
+            }
+        }
+
+        function copyMeetingLink() {
+            const link = document.getElementById('meeting-url-display').value;
+            navigator.clipboard.writeText(link).then(() => showNotification("Link copiado!", "success"));
+        }
+
+        // Função para atualizar avatar da reunião
+        let currentMeetingAvatar = "";
+        function updateMeetingAvatar(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentMeetingAvatar = e.target.result;
+                    document.getElementById('meet-preview-avatar').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function startMeeting() {
+            const container = document.getElementById('jitsi-container');
+            const lobby = document.getElementById('meeting-lobby');
+            const activeArea = document.getElementById('meeting-active-area');
+            const settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
+            
+            // Pega o ID da sala da URL (se for convidado) ou das configurações (se for dono)
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlRoomId = urlParams.get('meetingId');
+            const roomName = urlRoomId || settings.meetingRoomId || "ZandrixPublicLobby";
+            
+            // Definir Usuário
+            // Pega do input local (que pode ter sido editado pelo funcionário) ou usa o padrão
+            const myName = document.getElementById('meet-display-name').value;
+            const myAvatar = currentMeetingAvatar || settings.ownerPhoto || ""; 
+
+            if (!myName) return showNotification("Por favor, digite seu nome para entrar.", "error");
+
+            lobby.style.display = 'none';
+            activeArea.style.display = 'block';
+            container.innerHTML = ""; // Limpa anterior
+
+            const domain = 'meet.guifi.net'; // Servidor comunitário mais estável
+            const options = {
+                roomName: roomName,
+                width: '100%',
+                height: 600,
+                parentNode: container,
+                userInfo: {
+                    displayName: myName
+                },
+                configOverwrite: { 
+                    startWithAudioMuted: true, 
+                    startWithVideoMuted: true
+                },
+                interfaceConfigOverwrite: { SHOW_JITSI_WATERMARK: false }
+            };
+
+            jitsiApi = new JitsiMeetExternalAPI(domain, options);
+            
+            if(myAvatar) {
+                jitsiApi.executeCommand('avatarUrl', myAvatar);
+            }
+        }
+
+        function toggleScreenShare() {
+            if (jitsiApi) {
+                jitsiApi.executeCommand('toggleShareScreen');
+            }
+        }
+
+        function leaveMeeting() {
+            if (jitsiApi) jitsiApi.dispose();
+            document.getElementById('meeting-active-area').style.display = 'none';
+            document.getElementById('meeting-lobby').style.display = 'block';
+            document.getElementById('jitsi-container').innerHTML = '';
+        }
+
+        // --- Lógica de Contratos (NOVO) ---
+        function generateContract() {
+            const client = document.getElementById('ctr-client').value;
+            const doc = document.getElementById('ctr-doc').value;
+            const service = document.getElementById('ctr-service').value;
+            const value = document.getElementById('ctr-value').value;
+            const entry = document.getElementById('ctr-entry').value;
+            const deadline = document.getElementById('ctr-deadline').value;
+            const settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
+            const myName = settings.name || "Zandrix Agency";
+            const myOwner = settings.ownerName || "Representante Legal";
+
+            if(!client || !value) return showNotification("Preencha os dados principais.", "error");
+
+            const win = window.open('', '', 'width=900,height=800');
+            win.document.write(`
+                <html><head><title>Contrato de Prestação de Serviços</title>
+                <style>
+                    body { font-family: 'Times New Roman', serif; padding: 40px; max-width: 800px; margin: 0 auto; line-height: 1.6; }
+                    h1 { text-align: center; text-transform: uppercase; font-size: 18px; margin-bottom: 30px; }
+                    h2 { font-size: 14px; text-transform: uppercase; margin-top: 20px; }
+                    p { text-align: justify; margin-bottom: 10px; }
+                    .signature-box { margin-top: 50px; display: flex; justify-content: space-between; }
+                    .sig { width: 45%; border-top: 1px solid #000; text-align: center; padding-top: 10px; }
+                </style>
+                </head><body>
+                <h1>CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE DESENVOLVIMENTO WEB</h1>
+                
+                <p><strong>CONTRATADA:</strong> ${myName}, representada por ${myOwner}.</p>
+                <p><strong>CONTRATANTE:</strong> ${client}, portador(a) do CPF/CNPJ nº ${doc}.</p>
+
+                <h2>CLÁUSULA 1ª - DO OBJETO</h2>
+                <p>O presente contrato tem como objeto a prestação de serviços de desenvolvimento web, especificamente: <strong>${service}</strong>.</p>
+
+                <h2>CLÁUSULA 2ª - DO PRAZO</h2>
+                <p>A CONTRATADA compromete-se a entregar o serviço descrito na Cláusula 1ª no prazo estimado de <strong>${deadline} dias úteis</strong>, contados a partir do recebimento de todo o material necessário (textos, imagens, logotipos) por parte da CONTRATANTE.</p>
+
+                <h2>CLÁUSULA 3ª - DO VALOR E FORMA DE PAGAMENTO</h2>
+                <p>Pelos serviços prestados, a CONTRATANTE pagará à CONTRATADA o valor total de <strong>R$ ${value}</strong>.</p>
+                <p>O pagamento será realizado da seguinte forma: uma entrada de <strong>R$ ${entry}</strong> na assinatura deste contrato e o restante na entrega do projeto.</p>
+
+                <h2>CLÁUSULA 4ª - DAS OBRIGAÇÕES</h2>
+                <p>A CONTRATADA deverá entregar o projeto funcional e sem erros. A CONTRATANTE deverá fornecer as informações necessárias e realizar os pagamentos nas datas acordadas.</p>
+
+                <h2>CLÁUSULA 5ª - DO FORO</h2>
+                <p>Fica eleito o foro da comarca local para dirimir quaisquer dúvidas oriundas deste contrato.</p>
+
+                <p style="text-align: center; margin-top: 40px;">Local e Data: ______________________, ${new Date().toLocaleDateString()}</p>
+
+                <div class="signature-box">
+                    <div class="sig">
+                        <strong>${myName}</strong><br>CONTRATADA
+                    </div>
+                    <div class="sig">
+                        <strong>${client}</strong><br>CONTRATANTE
+                    </div>
+                </div>
+                
+                <script>window.print();<\/script>
+                </body></html>
+            `);
+        }
+
         // --- Lógica de Projetos (NOVO) ---
         let projects = JSON.parse(localStorage.getItem('zandrix_projects')) || [];
 
@@ -1968,6 +2297,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const mode = urlParams.get('mode');
             const token = urlParams.get('token');
+            const meetingId = urlParams.get('meetingId'); // Captura ID da reunião
             const settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
 
             // 1. Reset to Owner View (default)
@@ -1976,6 +2306,27 @@
             document.getElementById('socio-sidebar').style.display = 'none';
             document.body.classList.remove('role-socio'); // Reset role class
             document.querySelectorAll('.section').forEach(s => { s.style.display = '' }); // Reset display property
+            document.getElementById('meeting-admin-panel').style.display = 'block'; // Show admin panel by default
+
+            // Se for o dono (sem parametros de modo), preenche o nome automaticamente
+            if (!mode && !meetingId) {
+                document.getElementById('meet-display-name').value = settings.ownerName || "";
+                if(settings.ownerPhoto) {
+                    document.getElementById('meet-preview-avatar').src = settings.ownerPhoto;
+                    currentMeetingAvatar = settings.ownerPhoto;
+                }
+            }
+
+            // Se for Acesso APENAS para Reunião (Link de Convidado)
+            if (meetingId && !mode) {
+                // Esconde tudo, mostra apenas a reunião
+                document.getElementById('owner-sidebar').style.display = 'none';
+                document.querySelectorAll('.section').forEach(s => { s.style.display = 'none' });
+                document.getElementById('meetings').style.display = 'block';
+                document.getElementById('meeting-admin-panel').style.display = 'none'; // Esconde painel de admin
+                document.getElementById('mobile-menu-btn').style.display = 'none';
+                return; // Para a execução aqui
+            }
 
             // 2. Apply restrictions based on mode
             if (mode === 'employee') { // MODO FUNCIONÁRIO
@@ -1994,6 +2345,7 @@
                 document.getElementById('dashboard').style.display = 'none';
                 document.getElementById('financial').style.display = 'none';
                 document.getElementById('settings').style.display = 'none';
+                document.getElementById('meeting-admin-panel').style.display = 'none'; // Hide admin panel
                 showSection('employee-dashboard');
 
             } else if (mode === 'socio') { // MODO SÓCIO
@@ -2012,6 +2364,7 @@
                 // Hide forbidden sections
                 document.getElementById('settings').style.display = 'none';
                 document.getElementById('employee-dashboard').style.display = 'none';
+                document.getElementById('meeting-admin-panel').style.display = 'none'; // Hide admin panel
                 showSection('dashboard');
 
             } else { // MODO DONO (PADRÃO)
@@ -2075,6 +2428,8 @@
             loadProjects();
             loadRenewals();
             loadChecklist();
+            loadClients();
+            loadMeetingSettings();
             loadSettings();
             initParticles();
             checkMode(); // Verifica se é funcionário
@@ -2155,6 +2510,7 @@
                 expenses: JSON.parse(localStorage.getItem('zandrix_expenses')) || [],
                 notes: JSON.parse(localStorage.getItem('zandrix_notes_v2')) || [],
                 projects: JSON.parse(localStorage.getItem('zandrix_projects')) || [],
+                clients: JSON.parse(localStorage.getItem('zandrix_clients')) || [],
                 renewals: JSON.parse(localStorage.getItem('zandrix_renewals')) || [],
                 settings: JSON.parse(localStorage.getItem('zandrix_settings')) || {}
             };
