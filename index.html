@@ -1812,7 +1812,7 @@
         function generateNewMeetingRoom() {
             if(confirm("Tem certeza? Isso vai expulsar todos da sala atual e o link antigo deixará de funcionar.")) {
                 const settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
-                settings.meetingRoomId = 'ZandrixRoom_' + Math.random().toString(36).substring(2, 10);
+                settings.meetingRoomId = 'ZandrixMeet' + Date.now();
                 localStorage.setItem('zandrix_settings', JSON.stringify(settings));
                 
                 loadMeetingSettings();
@@ -1860,20 +1860,30 @@
             activeArea.style.display = 'block';
             container.innerHTML = ""; // Limpa anterior
 
-            const domain = 'meet.guifi.net'; // Servidor comunitário mais estável
+            const domain = 'meet.guifi.net'; // Servidor Aberto (Sem bloqueio de moderador)
             const options = {
                 roomName: roomName,
                 width: '100%',
                 height: 600,
                 parentNode: container,
+                lang: 'pt',
                 userInfo: {
                     displayName: myName
                 },
                 configOverwrite: { 
+                    prejoinPageEnabled: false, // Entra direto sem perguntar nada
                     startWithAudioMuted: true, 
                     startWithVideoMuted: true
                 },
-                interfaceConfigOverwrite: { SHOW_JITSI_WATERMARK: false }
+                interfaceConfigOverwrite: { 
+                    SHOW_JITSI_WATERMARK: false,
+                    TOOLBAR_BUTTONS: [
+                        'microphone', 'camera', 'desktop', 'fullscreen',
+                        'fodeviceselection', 'hangup', 'profile', 'chat',
+                        'settings', 'raisehand', 'videoquality', 'filmstrip', 
+                        'tileview', 'download', 'help', 'mute-everyone'
+                    ]
+                }
             };
 
             jitsiApi = new JitsiMeetExternalAPI(domain, options);
