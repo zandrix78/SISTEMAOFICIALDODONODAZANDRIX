@@ -1812,7 +1812,7 @@
         function generateNewMeetingRoom() {
             if(confirm("Tem certeza? Isso vai expulsar todos da sala atual e o link antigo deixará de funcionar.")) {
                 const settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
-                settings.meetingRoomId = 'Zandrix_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+                settings.meetingRoomId = 'ZandrixMeet' + Date.now();
                 localStorage.setItem('zandrix_settings', JSON.stringify(settings));
                 
                 loadMeetingSettings();
@@ -1860,6 +1860,7 @@
             activeArea.style.display = 'block';
             container.innerHTML = ""; // Limpa anterior
 
+            if (jitsiApi) jitsiApi.dispose(); // Garante que não tenha nada rodando antes
             const domain = 'meet.jit.si'; // Servidor Oficial (Único que funciona rápido no GitHub)
             const options = {
                 roomName: roomName,
@@ -1871,11 +1872,9 @@
                     displayName: myName
                 },
                 configOverwrite: { 
-                    prejoinPageEnabled: false,
+                    prejoinPageEnabled: false, // Tenta entrar direto
                     startWithAudioMuted: true, 
-                    startWithVideoMuted: true,
-                    disableDeepLinking: true,
-                    enableWelcomePage: false
+                    startWithVideoMuted: true
                 },
                 interfaceConfigOverwrite: { SHOW_JITSI_WATERMARK: false }
             };
