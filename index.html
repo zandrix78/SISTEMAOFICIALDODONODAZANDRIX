@@ -1882,7 +1882,7 @@
 
             lobby.style.display = 'none';
             activeArea.style.display = 'block';
-            container.innerHTML = `<div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #888;">Conectando à sala de reunião...</div>`;
+            container.innerHTML = ""; // Limpa o container para o Jitsi carregar corretamente sem obstruções
 
             if (typeof JitsiMeetExternalAPI === 'undefined') {
                 showNotification("Erro: O sistema de reuniões não carregou. Verifique sua conexão.", "error");
@@ -1893,7 +1893,7 @@
             if (jitsiApi) jitsiApi.dispose(); // Garante que não tenha nada rodando antes
             const domain = 'meet.jit.si'; // Servidor Oficial (Único que funciona rápido no GitHub)
 
-            let safeRoomName = roomName.replace(/[^a-zA-Z0-9]/g, '');
+            let safeRoomName = roomName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
             if (!safeRoomName) safeRoomName = "ZandrixRoom" + Math.floor(Math.random() * 10000);
 
             const options = {
@@ -1925,6 +1925,9 @@
                 // A mágica está aqui: esperamos o evento 'videoConferenceJoined'
                 // para ter certeza que a conexão foi estabelecida antes de fazer qualquer coisa.
                 jitsiApi.addEventListener('videoConferenceJoined', () => {
+                    // Garante que o nome seja definido corretamente após entrar
+                    if(myName) jitsiApi.executeCommand('displayName', myName);
+
                     // Limpa o chat ao entrar
                     document.getElementById('custom-chat-list').innerHTML = '';
 
