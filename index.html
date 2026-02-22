@@ -1882,11 +1882,10 @@
 
             lobby.style.display = 'none';
             activeArea.style.display = 'block';
-            container.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100%;color:#666;">Iniciando conexão segura...</div>';
+            container.innerHTML = ""; // Limpa container para evitar conflitos
 
             if (typeof JitsiMeetExternalAPI === 'undefined') {
                 showNotification("Erro: O sistema de reuniões não carregou. Verifique sua conexão.", "error");
-                container.innerHTML = `<div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #ff4444;">Falha ao carregar a API de Reunião.</div>`;
                 return;
             }
 
@@ -1896,7 +1895,7 @@
             }
             const domain = 'meet.jit.si'; // Servidor Oficial (Único que funciona rápido no GitHub)
 
-            let safeRoomName = roomName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+            let safeRoomName = roomName.replace(/[^a-zA-Z0-9]/g, '');
             if (!safeRoomName) safeRoomName = "ZandrixRoom" + Math.floor(Math.random() * 10000);
 
             const options = {
@@ -1905,43 +1904,34 @@
                 height: 600, // Força altura fixa para evitar erros de renderização no GitHub
                 parentNode: container,
                 lang: 'pt',
-                // userInfo removido daqui. Enviaremos o nome só depois de conectar para não travar.
+                userInfo: {
+                    displayName: myName
+                },
                 configOverwrite: {
                     prejoinPageEnabled: false, // Tenta entrar direto
                     startWithAudioMuted: true,
                     startWithVideoMuted: true,
-                    // A regra do Jitsi é: o primeiro que entra na sala se torna o moderador.
-                    // Esta configuração abaixo apenas remove o ícone de "estrela" do moderador,
-                    // mas não altera a regra principal. A sala funcionará como você quer.
-                    disableModeratorIndicator: true,
-                    disableDeepLinking: true, // Evita redirecionamentos e erros em mobile/web
-                    // CORREÇÃO DEFINITIVA: Desativa P2P para evitar quedas de conexão no GitHub
-                    p2p: { enabled: false },
-                    // OTIMIZAÇÃO: Inicia leve para não travar o carregamento
-                    resolution: 360,
-                    constraints: {
-                        video: {
-                            height: { ideal: 360, max: 360, min: 240 }
-                        }
-                    }
+                    disableDeepLinking: true // Evita redirecionamentos e erros em mobile/web
                 },
                 interfaceConfigOverwrite: {
                     SHOW_JITSI_WATERMARK: false,
-                    SHOW_WATERMARK_FOR_GUESTS: false
+                    SHOW_WATERMARK_FOR_GUESTS: false,
+                    TOOLBAR_BUTTONS: [
+                        'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
+                        'fodeviceselection', 'hangup', 'profile', 'chat', 'recording',
+                        'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+                        'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
+                        'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone'
+                    ]
                 }
             };
 
-            // O segredo para não travar: esperar o elemento renderizar na tela antes de carregar o Jitsi
+            // Reinicia o sistema de reunião com configurações limpas
             setTimeout(() => {
-                container.innerHTML = ""; 
                 try {
                     jitsiApi = new JitsiMeetExternalAPI(domain, options);
                     
                     jitsiApi.addEventListener('videoConferenceJoined', () => {
-                        // Define o nome apenas APÓS entrar na sala com sucesso
-                        if(myName) jitsiApi.executeCommand('displayName', myName);
-                        // Garante que o avatar seja vazio para não pesar a conexão
-                        jitsiApi.executeCommand('avatarUrl', ''); 
                         document.getElementById('custom-chat-list').innerHTML = '';
                     });
 
@@ -1956,9 +1946,9 @@
                 } catch (e) {
                     console.error(e);
                     showNotification("Erro ao iniciar a reunião.", "error");
-                    container.innerHTML = `<div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #ff4444;">Erro ao conectar. Tente recarregar.</div>`;
+                    container.innerHTML = "Erro ao carregar.";
                 }
-            }, 500); // Tempo ajustado para resposta mais rápida
+            }, 100);
 
         }
 
