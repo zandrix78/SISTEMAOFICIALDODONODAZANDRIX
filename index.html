@@ -1860,10 +1860,19 @@
             activeArea.style.display = 'block';
             container.innerHTML = ""; // Limpa anterior
 
+            if (typeof JitsiMeetExternalAPI === 'undefined') {
+                showNotification("Erro: O sistema de reuniões não carregou. Verifique sua conexão.", "error");
+                return;
+            }
+
             if (jitsiApi) jitsiApi.dispose(); // Garante que não tenha nada rodando antes
             const domain = 'meet.jit.si'; // Servidor Oficial (Único que funciona rápido no GitHub)
+            
+            let safeRoomName = roomName.replace(/[^a-zA-Z0-9]/g, '');
+            if (!safeRoomName) safeRoomName = "ZandrixRoom" + Math.floor(Math.random() * 10000);
+
             const options = {
-                roomName:  roomName.replace(/[^a-zA-Z0-9]/g, ''),//roomName, //Remove special characters
+                roomName: safeRoomName,
                 width: '100%',
                 height: 600,
                 parentNode: container,
@@ -1879,10 +1888,16 @@
                 interfaceConfigOverwrite: { SHOW_JITSI_WATERMARK: false }
             };
 
-            jitsiApi = new JitsiMeetExternalAPI(domain, options);
-            
-            if(myAvatar) {
-                jitsiApi.executeCommand('avatarUrl', myAvatar);
+            try {
+                jitsiApi = new JitsiMeetExternalAPI(domain, options);
+                
+                if(myAvatar) {
+                    setTimeout(() => {
+                        try { jitsiApi.executeCommand('avatarUrl', myAvatar); } catch(e){}
+                    }, 2000);
+                }
+            } catch (e) {
+                showNotification("Erro ao iniciar a reunião.", "error");
             }
 
         }
