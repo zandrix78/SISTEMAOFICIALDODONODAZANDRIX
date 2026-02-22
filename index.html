@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zandrix SaaS Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src='https://meet.jit.si/external_api.js'></script>
     <style>
         :root {
             --primary-color: #9d00ff; /* Roxo Neon */
@@ -512,22 +511,6 @@
         .renewal-late { background: #ff4444; color: white; }
         .renewal-days { font-size: 11px; color: #888; margin-left: 5px; }
 
-        /* Custom Meeting Chat */
-        .meeting-grid { display: flex; gap: 20px; height: 600px; }
-        .video-area { flex: 1; background: #000; border-radius: 10px; overflow: hidden; position: relative; }
-        .chat-area { width: 300px; display: flex; flex-direction: column; background: #111; border: 1px solid #333; border-radius: 10px; }
-        .chat-messages { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
-        .chat-msg { padding: 8px 12px; border-radius: 8px; font-size: 13px; max-width: 85%; word-wrap: break-word; }
-        .chat-msg.mine { align-self: flex-end; background: var(--primary-color); color: white; }
-        .chat-msg.others { align-self: flex-start; background: #333; color: #ccc; }
-        .chat-input-area { padding: 10px; border-top: 1px solid #333; display: flex; gap: 5px; }
-        .chat-sender-name { font-size: 10px; color: #888; margin-bottom: 2px; }
-        
-        @media (max-width: 768px) {
-            .meeting-grid { flex-direction: column; height: auto; }
-            .chat-area { width: 100%; height: 300px; }
-        }
-
         /* Scroll Controls (Desktop Only) */
         .scroll-controls {
             position: fixed;
@@ -854,62 +837,35 @@
 
         <!-- Meetings Section (NEW) -->
         <div id="meetings" class="section">
-            <h2>Sala de Reuniões Zandrix</h2>
+            <h2>Central de Reuniões</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Gerencie seus links de videoconferência (Google Meet, Zoom, Teams) ou crie salas instantâneas.</p>
             
-            <!-- Área do Dono: Controle da Sala -->
-            <div class="card owner-only" id="meeting-admin-panel">
-                <label>Configuração da Sala</label>
-                <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Este é o link único da reunião. Envie para sua equipe. Eles colocarão o nome e foto ao entrar.</p>
-                
-                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <input type="text" id="meeting-url-display" readonly style="background: #111; color: var(--primary-color); font-weight: bold;">
-                    <button class="action-btn" onclick="copyMeetingLink()" style="width: auto;">🔗 Copiar</button>
+            <div class="card">
+                <label>Sua Sala Principal (Link Fixo)</label>
+                <p style="font-size: 12px; color: #888; margin-bottom: 10px;">Cole aqui o link da sua reunião recorrente (ex: Google Meet ou Zoom) para acesso rápido.</p>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="meeting-link-input" placeholder="Ex: https://meet.google.com/abc-defg-hij">
+                    <button class="action-btn" onclick="saveMeetingLink()" style="width: auto;">💾 Salvar</button>
                 </div>
-
-                <label style="color: #ff4444;">Segurança / Banimento</label>
-                <p style="color: #aaa; font-size: 12px; margin-bottom: 10px;">Se precisar expulsar alguém ou impedir o acesso, gere uma nova sala. O link antigo deixará de funcionar imediatamente.</p>
-                <button class="action-btn" onclick="generateNewMeetingRoom()" style="background: #ff4444;">🔄 Gerar Nova Sala (Invalidar Link Antigo)</button>
             </div>
 
-            <!-- Área de Perfil do Usuário (Para todos personalizarem antes de entrar) -->
-            <div class="card" id="meeting-lobby">
-                <label>Seu Perfil para a Reunião</label>
-                <div style="display: flex; gap: 15px; align-items: center;">
-                    <div style="text-align: center;">
-                        <img id="meet-preview-avatar" src="https://i.imgur.com/w28Wu0f.png" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color);">
-                        <button onclick="document.getElementById('meet-upload-avatar').click()" style="background: #333; border: none; color: white; font-size: 10px; padding: 5px; margin-top: 5px; cursor: pointer; border-radius: 3px;">📷 Trocar Foto</button>
-                        <input type="file" id="meet-upload-avatar" accept="image/*" style="display: none;" onchange="updateMeetingAvatar(this)">
-                    </div>
-                    <div style="flex: 1;">
-                        <label style="font-size: 12px; margin-bottom: 5px;">Seu Nome na Sala:</label>
-                        <input type="text" id="meet-display-name" placeholder="Digite seu nome aqui...">
-                    </div>
+            <div class="stats-grid">
+                <div class="stat-card" onclick="openMeeting()" style="cursor: pointer; transition: 0.3s; border-left-color: #00cc00;">
+                    <label style="color: #00cc00; cursor: pointer;">Entrar na Reunião</label>
+                    <div class="stat-value">▶️ Iniciar</div>
+                    <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Abrir link salvo em nova aba</div>
                 </div>
-                <button class="action-btn" onclick="startMeeting()" id="btn-join-meet" style="width: 100%; margin-top: 15px;">🎥 Entrar na Reunião</button>
+                <div class="stat-card" onclick="copySavedLink()" style="cursor: pointer; transition: 0.3s; border-left-color: #0055aa;">
+                    <label style="color: #0055aa; cursor: pointer;">Convidar</label>
+                    <div class="stat-value">🔗 Copiar</div>
+                    <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Copiar link para área de transferência</div>
+                </div>
             </div>
 
-            <!-- Área de Reunião (Para todos) -->
-            <div class="card" id="meeting-active-area" style="display: none;">
-                <label>Reunião em Andamento</label>
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <button class="action-btn" onclick="toggleScreenShare()" style="background: #0055aa; flex: 1;">🖥️ Compartilhar Tela</button>
-                    <button class="action-btn" onclick="leaveMeeting()" style="background: #333; flex: 1;">❌ Sair</button>
-                </div>
-                
-                <!-- Container do Jitsi -->
-                <div class="meeting-grid">
-                    <div class="video-area" id="jitsi-container">
-                        <div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #666;">Aguardando conexão...</div>
-                    </div>
-                    <div class="chat-area">
-                        <div style="padding: 10px; border-bottom: 1px solid #333; font-weight: bold; color: var(--primary-color); font-size: 14px;">💬 Chat da Sala</div>
-                        <div class="chat-messages" id="custom-chat-list"></div>
-                        <div class="chat-input-area">
-                            <input type="text" id="custom-chat-input" placeholder="Digite..." style="margin-bottom: 0; font-size: 13px;" onkeypress="if(event.key === 'Enter') sendCustomMessage()">
-                            <button onclick="sendCustomMessage()" style="background: var(--primary-color); border: none; color: white; border-radius: 5px; width: 40px; cursor: pointer;">➤</button>
-                        </div>
-                    </div>
-                </div>
+            <div class="card">
+                <label>Sala de Emergência (Instantânea)</label>
+                <p style="font-size: 12px; color: #888; margin-bottom: 10px;">Precisa de uma sala agora e não tem link? Gere uma sala segura instantaneamente.</p>
+                <button class="action-btn" onclick="createInstantRoom()" style="background: #333;">⚡ Criar Sala Jitsi (Nova Aba)</button>
             </div>
         </div>
 
@@ -1816,182 +1772,45 @@
             }
         }
 
-        // --- Lógica de Reuniões (NOVO) ---
-        let jitsiApi = null;
-
-        function loadMeetingSettings() {
+        // --- Lógica de Reuniões (LINKS EXTERNOS) ---
+        function loadMeetingLink() {
             const settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
+            if(settings.meetingLink) {
+                document.getElementById('meeting-link-input').value = settings.meetingLink;
+            }
+        }
+
+        function saveMeetingLink() {
+            const link = document.getElementById('meeting-link-input').value;
+            if(!link) return showNotification("Digite um link válido.", "error");
             
-            // Se não tiver ID de sala, cria um
-            if (!settings.meetingRoomId) {
-                settings.meetingRoomId = 'ZandrixRoom_' + Math.random().toString(36).substring(2, 10);
-                localStorage.setItem('zandrix_settings', JSON.stringify(settings));
-            }
-
-            // Monta o link
-            const link = `${window.location.href.split('?')[0]}?meetingId=${settings.meetingRoomId}`;
-            document.getElementById('meeting-url-display').value = link;
-        }
-
-        function generateNewMeetingRoom() {
-            if(confirm("Tem certeza? Isso vai expulsar todos da sala atual e o link antigo deixará de funcionar.")) {
-                const settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
-                settings.meetingRoomId = 'ZandrixMeet' + Date.now();
-                localStorage.setItem('zandrix_settings', JSON.stringify(settings));
-                
-                loadMeetingSettings();
-                showNotification("Nova sala gerada! Envie o novo link.", "success");
-            }
-        }
-
-        function copyMeetingLink() {
-            const link = document.getElementById('meeting-url-display').value;
-            navigator.clipboard.writeText(link).then(() => showNotification("Link copiado!", "success"));
-        }
-
-        // Função para atualizar avatar da reunião
-        let currentMeetingAvatar = "";
-        function updateMeetingAvatar(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    currentMeetingAvatar = e.target.result;
-                    document.getElementById('meet-preview-avatar').src = e.target.result;
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function startMeeting() {
-            const container = document.getElementById('jitsi-container');
-            const lobby = document.getElementById('meeting-lobby');
-            const activeArea = document.getElementById('meeting-active-area');
             const settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
-            
-            // Pega o ID da sala da URL (se for convidado) ou das configurações (se for dono)
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlRoomId = urlParams.get('meetingId');
-            const roomName = urlRoomId || settings.meetingRoomId || "ZandrixPublicLobby";
-            
-            // Definir Usuário
-            // Pega do input local (que pode ter sido editado pelo funcionário) ou usa o padrão
-            const myName = document.getElementById('meet-display-name').value;
-            // REMOVIDO: Variável de avatar eliminada para garantir que nenhuma foto pese na conexão
-
-            if (!myName) return showNotification("Por favor, digite seu nome para entrar.", "error");
-
-            lobby.style.display = 'none';
-            activeArea.style.display = 'block';
-            container.innerHTML = ""; // Limpa container para evitar conflitos
-
-            if (typeof JitsiMeetExternalAPI === 'undefined') {
-                showNotification("Erro: O sistema de reuniões não carregou. Verifique sua conexão.", "error");
-                return;
-            }
-
-            if (jitsiApi) {
-                try { jitsiApi.dispose(); } catch(e) {}
-                jitsiApi = null;
-            }
-            const domain = 'meet.jit.si'; // Servidor Oficial (Único que funciona rápido no GitHub)
-
-            let safeRoomName = roomName.replace(/[^a-zA-Z0-9]/g, '');
-            if (!safeRoomName) safeRoomName = "ZandrixRoom" + Math.floor(Math.random() * 10000);
-
-            const options = {
-                roomName: safeRoomName,
-                width: '100%',
-                height: 600, // Força altura fixa para evitar erros de renderização no GitHub
-                parentNode: container,
-                lang: 'pt',
-                userInfo: {
-                    displayName: myName
-                },
-                configOverwrite: {
-                    prejoinPageEnabled: false, // Tenta entrar direto
-                    startWithAudioMuted: true,
-                    startWithVideoMuted: true,
-                    disableDeepLinking: true // Evita redirecionamentos e erros em mobile/web
-                },
-                interfaceConfigOverwrite: {
-                    SHOW_JITSI_WATERMARK: false,
-                    SHOW_WATERMARK_FOR_GUESTS: false,
-                    TOOLBAR_BUTTONS: [
-                        'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
-                        'fodeviceselection', 'hangup', 'profile', 'chat', 'recording',
-                        'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
-                        'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
-                        'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone'
-                    ]
-                }
-            };
-
-            // Reinicia o sistema de reunião com configurações limpas
-            setTimeout(() => {
-                try {
-                    jitsiApi = new JitsiMeetExternalAPI(domain, options);
-                    
-                    jitsiApi.addEventListener('videoConferenceJoined', () => {
-                        document.getElementById('custom-chat-list').innerHTML = '';
-                    });
-
-                    jitsiApi.addEventListener('incomingMessage', (data) => {
-                        addChatMessage(data.nick || 'Usuário', data.message, false);
-                    });
-
-                    jitsiApi.addEventListener('videoConferenceLeft', () => {
-                        leaveMeeting();
-                    });
-
-                } catch (e) {
-                    console.error(e);
-                    showNotification("Erro ao iniciar a reunião.", "error");
-                    container.innerHTML = "Erro ao carregar.";
-                }
-            }, 100);
-
+            settings.meetingLink = link;
+            localStorage.setItem('zandrix_settings', JSON.stringify(settings));
+            showNotification("Link salvo com sucesso!", "success");
         }
 
-        function toggleScreenShare() {
-            if (jitsiApi) {
-                jitsiApi.executeCommand('toggleShareScreen');
+        function openMeeting() {
+            const settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
+            if(settings.meetingLink) {
+                window.open(settings.meetingLink, '_blank');
+            } else {
+                showNotification("Nenhum link salvo. Configure acima.", "error");
             }
         }
 
-        function sendCustomMessage() {
-            const input = document.getElementById('custom-chat-input');
-            const msg = input.value;
-            if(!msg || !jitsiApi) return;
-
-            // Envia para o Jitsi (que distribui para todos na sala)
-            jitsiApi.executeCommand('sendChatMessage', msg);
-            
-            // Adiciona visualmente no meu chat (como "Eu")
-            addChatMessage('Eu', msg, true);
-            
-            input.value = '';
-        }
-
-        function addChatMessage(sender, text, isMe) {
-            const list = document.getElementById('custom-chat-list');
-            const div = document.createElement('div');
-            div.className = `chat-msg ${isMe ? 'mine' : 'others'}`;
-            
-            if(!isMe) div.innerHTML = `<div class="chat-sender-name">${sender}</div>${text}`;
-            else div.innerText = text;
-
-            list.appendChild(div);
-            list.scrollTop = list.scrollHeight; // Rola para o final
-        }
-
-        function leaveMeeting() {
-            if (jitsiApi) {
-                try { jitsiApi.dispose(); } catch(e) {}
-                jitsiApi = null;
+        function copySavedLink() {
+            const settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
+            if(settings.meetingLink) {
+                navigator.clipboard.writeText(settings.meetingLink).then(() => showNotification("Link copiado!", "success"));
+            } else {
+                showNotification("Nenhum link salvo.", "error");
             }
-            document.getElementById('meeting-active-area').style.display = 'none';
-            document.getElementById('meeting-lobby').style.display = 'block';
-            document.getElementById('jitsi-container').innerHTML = '';
+        }
+
+        function createInstantRoom() {
+            const room = "Zandrix_" + Math.floor(Math.random() * 100000);
+            window.open(`https://meet.jit.si/${room}`, '_blank');
         }
 
         // --- Lógica de Contratos (NOVO) ---
@@ -2395,7 +2214,6 @@
             const urlParams = new URLSearchParams(window.location.search);
             const mode = urlParams.get('mode');
             const token = urlParams.get('token');
-            const meetingId = urlParams.get('meetingId'); // Captura ID da reunião
             const settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
 
             // 1. Reset to Owner View (default)
@@ -2404,27 +2222,6 @@
             document.getElementById('socio-sidebar').style.display = 'none';
             document.body.classList.remove('role-socio'); // Reset role class
             document.querySelectorAll('.section').forEach(s => { s.style.display = '' }); // Reset display property
-            document.getElementById('meeting-admin-panel').style.display = 'block'; // Show admin panel by default
-
-            // Se for o dono (sem parametros de modo), preenche o nome automaticamente
-            if (!mode && !meetingId) {
-                document.getElementById('meet-display-name').value = settings.ownerName || "";
-                if(settings.ownerPhoto) {
-                    document.getElementById('meet-preview-avatar').src = settings.ownerPhoto;
-                    currentMeetingAvatar = settings.ownerPhoto;
-                }
-            }
-
-            // Se for Acesso APENAS para Reunião (Link de Convidado)
-            if (meetingId && !mode) {
-                // Esconde tudo, mostra apenas a reunião
-                document.getElementById('owner-sidebar').style.display = 'none';
-                document.querySelectorAll('.section').forEach(s => { s.style.display = 'none' });
-                document.getElementById('meetings').style.display = 'block';
-                document.getElementById('meeting-admin-panel').style.display = 'none'; // Esconde painel de admin
-                document.getElementById('mobile-menu-btn').style.display = 'none';
-                return; // Para a execução aqui
-            }
 
             // 2. Apply restrictions based on mode
             if (mode === 'employee') { // MODO FUNCIONÁRIO
@@ -2443,7 +2240,6 @@
                 document.getElementById('dashboard').style.display = 'none';
                 document.getElementById('financial').style.display = 'none';
                 document.getElementById('settings').style.display = 'none';
-                document.getElementById('meeting-admin-panel').style.display = 'none'; // Hide admin panel
                 showSection('employee-dashboard');
 
             } else if (mode === 'socio') { // MODO SÓCIO
@@ -2462,7 +2258,6 @@
                 // Hide forbidden sections
                 document.getElementById('settings').style.display = 'none';
                 document.getElementById('employee-dashboard').style.display = 'none';
-                document.getElementById('meeting-admin-panel').style.display = 'none'; // Hide admin panel
                 showSection('dashboard');
 
             } else { // MODO DONO (PADRÃO)
@@ -2527,7 +2322,7 @@
             loadRenewals();
             loadChecklist();
             loadClients();
-            loadMeetingSettings();
+            loadMeetingLink();
             loadSettings();
             initParticles();
             checkMode(); // Verifica se é funcionário
