@@ -1882,7 +1882,7 @@
 
             lobby.style.display = 'none';
             activeArea.style.display = 'block';
-            container.innerHTML = ""; // Limpa o container para o Jitsi carregar corretamente sem obstruções
+            container.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100%;color:#666;">Iniciando conexão segura...</div>';
 
             if (typeof JitsiMeetExternalAPI === 'undefined') {
                 showNotification("Erro: O sistema de reuniões não carregou. Verifique sua conexão.", "error");
@@ -1890,7 +1890,10 @@
                 return;
             }
 
-            if (jitsiApi) jitsiApi.dispose(); // Garante que não tenha nada rodando antes
+            if (jitsiApi) {
+                try { jitsiApi.dispose(); } catch(e) {}
+                jitsiApi = null;
+            }
             const domain = 'meet.jit.si'; // Servidor Oficial (Único que funciona rápido no GitHub)
 
             let safeRoomName = roomName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
@@ -1920,32 +1923,34 @@
                 }
             };
 
-            try {
-                jitsiApi = new JitsiMeetExternalAPI(domain, options);
-                // A mágica está aqui: esperamos o evento 'videoConferenceJoined'
-                // para ter certeza que a conexão foi estabelecida antes de fazer qualquer coisa.
-                jitsiApi.addEventListener('videoConferenceJoined', () => {
-                    // Garante que o nome seja definido corretamente após entrar
-                    if(myName) jitsiApi.executeCommand('displayName', myName);
+            // O segredo para não travar: esperar o elemento renderizar na tela antes de carregar o Jitsi
+            setTimeout(() => {
+                container.innerHTML = ""; 
+                try {
+                    jitsiApi = new JitsiMeetExternalAPI(domain, options);
+                    
+                    jitsiApi.addEventListener('videoConferenceJoined', () => {
+                        if(myName) jitsiApi.executeCommand('displayName', myName);
+                        document.getElementById('custom-chat-list').innerHTML = '';
+                        if (myAvatar) {
+                            jitsiApi.executeCommand('avatarUrl', myAvatar);
+                        }
+                    });
 
-                    // Limpa o chat ao entrar
-                    document.getElementById('custom-chat-list').innerHTML = '';
+                    jitsiApi.addEventListener('incomingMessage', (data) => {
+                        addChatMessage(data.nick || 'Usuário', data.message, false);
+                    });
 
-                    // Só tenta mudar o avatar DEPOIS que a conexão for um sucesso.
-                    // Isso evita que a reunião "paralise" na inicialização.
-                    if (myAvatar) {
-                        jitsiApi.executeCommand('avatarUrl', myAvatar);
-                    }
-                });
+                    jitsiApi.addEventListener('videoConferenceLeft', () => {
+                        leaveMeeting();
+                    });
 
-                // Escuta mensagens de outros participantes
-                jitsiApi.addEventListener('incomingMessage', (data) => {
-                    addChatMessage(data.nick || 'Usuário', data.message, false);
-                });
-            } catch (e) {
-                showNotification("Erro ao iniciar a reunião.", "error");
-                container.innerHTML = `<div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #ff4444;">Ocorreu um erro inesperado.</div>`;
-            }
+                } catch (e) {
+                    console.error(e);
+                    showNotification("Erro ao iniciar a reunião.", "error");
+                    container.innerHTML = `<div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #ff4444;">Erro ao conectar. Tente recarregar.</div>`;
+                }
+            }, 500);
 
         }
 
@@ -1982,7 +1987,10 @@
         }
 
         function leaveMeeting() {
-            if (jitsiApi) jitsiApi.dispose();
+            if (jitsiApi) {
+                try { jitsiApi.dispose(); } catch(e) {}
+                jitsiApi = null;
+            }
             document.getElementById('meeting-active-area').style.display = 'none';
             document.getElementById('meeting-lobby').style.display = 'block';
             document.getElementById('jitsi-container').innerHTML = '';
