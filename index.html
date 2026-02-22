@@ -1876,7 +1876,7 @@
             // Definir Usuário
             // Pega do input local (que pode ter sido editado pelo funcionário) ou usa o padrão
             const myName = document.getElementById('meet-display-name').value;
-            const myAvatar = currentMeetingAvatar || settings.ownerPhoto || ""; 
+            // REMOVIDO: Variável de avatar eliminada para garantir que nenhuma foto pese na conexão
 
             if (!myName) return showNotification("Por favor, digite seu nome para entrar.", "error");
 
@@ -1905,9 +1905,7 @@
                 height: 600, // Força altura fixa para evitar erros de renderização no GitHub
                 parentNode: container,
                 lang: 'pt',
-                userInfo: {
-                    displayName: myName
-                },
+                // userInfo removido daqui. Enviaremos o nome só depois de conectar para não travar.
                 configOverwrite: {
                     prejoinPageEnabled: false, // Tenta entrar direto
                     startWithAudioMuted: true,
@@ -1915,7 +1913,17 @@
                     // A regra do Jitsi é: o primeiro que entra na sala se torna o moderador.
                     // Esta configuração abaixo apenas remove o ícone de "estrela" do moderador,
                     // mas não altera a regra principal. A sala funcionará como você quer.
-                    disableModeratorIndicator: true
+                    disableModeratorIndicator: true,
+                    disableDeepLinking: true, // Evita redirecionamentos e erros em mobile/web
+                    // CORREÇÃO DEFINITIVA: Desativa P2P para evitar quedas de conexão no GitHub
+                    p2p: { enabled: false },
+                    // OTIMIZAÇÃO: Inicia leve para não travar o carregamento
+                    resolution: 360,
+                    constraints: {
+                        video: {
+                            height: { ideal: 360, max: 360, min: 240 }
+                        }
+                    }
                 },
                 interfaceConfigOverwrite: {
                     SHOW_JITSI_WATERMARK: false,
@@ -1930,11 +1938,11 @@
                     jitsiApi = new JitsiMeetExternalAPI(domain, options);
                     
                     jitsiApi.addEventListener('videoConferenceJoined', () => {
+                        // Define o nome apenas APÓS entrar na sala com sucesso
                         if(myName) jitsiApi.executeCommand('displayName', myName);
+                        // Garante que o avatar seja vazio para não pesar a conexão
+                        jitsiApi.executeCommand('avatarUrl', ''); 
                         document.getElementById('custom-chat-list').innerHTML = '';
-                        // CORREÇÃO CRÍTICA: O envio da foto (Avatar) foi removido aqui.
-                        // Enviar imagens pesadas (Base64) derruba a conexão no GitHub Pages.
-                        // Agora a reunião entrará instantaneamente sem desconectar.
                     });
 
                     jitsiApi.addEventListener('incomingMessage', (data) => {
@@ -1950,7 +1958,7 @@
                     showNotification("Erro ao iniciar a reunião.", "error");
                     container.innerHTML = `<div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #ff4444;">Erro ao conectar. Tente recarregar.</div>`;
                 }
-            }, 1500); // Tempo aumentado para 1.5s para garantir estabilidade total no GitHub
+            }, 500); // Tempo ajustado para resposta mais rápida
 
         }
 
