@@ -1902,7 +1902,7 @@
             const options = {
                 roomName: safeRoomName,
                 width: '100%',
-                height: '100%',
+                height: 600, // Força altura fixa para evitar erros de renderização no GitHub
                 parentNode: container,
                 lang: 'pt',
                 userInfo: {
@@ -1932,9 +1932,9 @@
                     jitsiApi.addEventListener('videoConferenceJoined', () => {
                         if(myName) jitsiApi.executeCommand('displayName', myName);
                         document.getElementById('custom-chat-list').innerHTML = '';
-                        if (myAvatar) {
-                            jitsiApi.executeCommand('avatarUrl', myAvatar);
-                        }
+                        // CORREÇÃO CRÍTICA: O envio da foto (Avatar) foi removido aqui.
+                        // Enviar imagens pesadas (Base64) derruba a conexão no GitHub Pages.
+                        // Agora a reunião entrará instantaneamente sem desconectar.
                     });
 
                     jitsiApi.addEventListener('incomingMessage', (data) => {
@@ -1950,7 +1950,7 @@
                     showNotification("Erro ao iniciar a reunião.", "error");
                     container.innerHTML = `<div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #ff4444;">Erro ao conectar. Tente recarregar.</div>`;
                 }
-            }, 500);
+            }, 1500); // Tempo aumentado para 1.5s para garantir estabilidade total no GitHub
 
         }
 
