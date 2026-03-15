@@ -31,6 +31,21 @@
             overflow: hidden;
         }
 
+        #background-video {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -2;
+            transform: translateX(-50%) translateY(-50%);
+            object-fit: cover;
+            opacity: 0.15; /* Deixa o vídeo bem sutil */
+            filter: brightness(0.7); /* Escurece um pouco mais o vídeo */
+        }
+
         /* Sidebar */
         .sidebar {
             width: 250px;
@@ -528,11 +543,243 @@
         
         @media (max-width: 768px) { .scroll-controls { display: none; } }
 
+        /* --- NEW PUBLIC FORM STYLES (WIZARD) --- */
+        .public-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 2000;
+            display: flex; justify-content: center; align-items: center;
+            background: radial-gradient(circle at center, #1a0033 0%, #000 100%);
+            flex-direction: column; /* Permite empilhar os links acima do card */
+        }
+
+        .wizard-card {
+            width: 100%; max-width: 600px;
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(157, 0, 255, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 0 50px rgba(157, 0, 255, 0.2);
+            overflow: hidden;
+            text-align: center;
+            margin: 10px 20px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Alinha conteúdo no topo */
+        }
+
+
+        .progress-container { width: 100%; background: #222; height: 6px; border-radius: 10px; margin-bottom: 30px; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary-color), #ff00dd); width: 0%; transition: width 0.5s ease; box-shadow: 0 0 10px var(--primary-color); }
+
+        .wizard-step { 
+            display: none; 
+            animation: slideUp 0.6s ease-out;
+            width: 100%;
+            margin-top: 20px; /* Espaço entre a barra de progresso e as perguntas */
+            flex-direction: column;
+            align-items: center;
+        }
+        .wizard-step.active { display: flex; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .wizard-title { font-size: 26px; color: white; margin-bottom: 10px; font-weight: bold; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        .wizard-desc { font-size: 14px; color: #aaa; margin-bottom: 25px; }
+
+        .wizard-input {
+            background: #000; border: 2px solid #333; padding: 15px; font-size: 16px; color: white; width: 100%; border-radius: 10px; margin-bottom: 20px; transition: 0.3s;
+        }
+        .wizard-input:focus { border-color: var(--primary-color); box-shadow: 0 0 15px rgba(157, 0, 255, 0.4); transform: scale(1.02); }
+
+        .wizard-btn {
+            background: linear-gradient(45deg, var(--primary-color), #6a00aa);
+            color: white; padding: 15px 30px; border: none; border-radius: 50px;
+            font-size: 18px; font-weight: bold; cursor: pointer; width: 100%;
+            transition: 0.3s; box-shadow: 0 0 20px rgba(157, 0, 255, 0.3);
+            margin-top: 10px;
+        }
+        .wizard-btn:hover { transform: translateY(-3px); box-shadow: 0 0 30px rgba(157, 0, 255, 0.6); }
+        
+        .btn-secondary { background: transparent; border: 1px solid #444; margin-top: 10px; font-size: 14px; padding: 10px; }
+        .btn-secondary:hover { background: #111; border-color: white; }
+
+        /* Option Cards (Selection) */
+        .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; }
+        .option-card {
+            background: #111; border: 1px solid #333; padding: 15px; border-radius: 10px; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .option-card:hover, .option-card.selected {
+            border-color: var(--primary-color); background: rgba(157, 0, 255, 0.1); transform: translateY(-2px);
+        }
+        .option-icon { font-size: 24px; }
+
+        /* Floating Particles specific to wizard */
+        .floating-shape {
+            position: absolute; border-radius: 50%; filter: blur(40px); z-index: -1;
+            animation: float 10s infinite ease-in-out;
+        }
+        .shape-1 { width: 300px; height: 300px; background: rgba(157, 0, 255, 0.15); top: -100px; left: -100px; }
+        .shape-2 { width: 200px; height: 200px; background: rgba(0, 255, 200, 0.1); bottom: -50px; right: -50px; animation-delay: 2s; }
+        
+        @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(20px, 20px); } }
+
+        .success-checkmark {
+            font-size: 60px; color: #00cc00; display: block; margin-bottom: 20px; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* Top Social Links */
+        .public-header-links {
+            display: flex; gap: 15px; margin-bottom: 10px; z-index: 2002; flex-wrap: wrap; justify-content: center;
+        }
+        .header-link-btn {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(157, 0, 255, 0.5);
+            color: white; padding: 10px 20px; border-radius: 30px; text-decoration: none; font-size: 14px; font-weight: bold; transition: 0.3s; backdrop-filter: blur(5px); display: flex; align-items: center; gap: 8px;
+        }
+        .header-link-btn:hover { background: var(--primary-color); box-shadow: 0 0 20px var(--primary-color); transform: translateY(-3px); border-color: var(--primary-color); }
+
+        /* Mobile Responsive Fixes */
+        @media (max-width: 768px) {
+            .wizard-card {
+                padding: 30px 20px;
+                width: 95%;
+            }
+            .wizard-title { font-size: 22px; }
+            .wizard-input, .wizard-btn { font-size: 14px; padding: 12px; }
+            .option-grid { grid-template-columns: 1fr; }
+            .public-header-links { margin-top: 10px; }
+        }
+
+        .wizard-logo {
+            width: 80px; height: 80px; border-radius: 50%;
+            border: 2px solid var(--primary-color);
+            margin: 0 auto 20px auto; /* Centraliza e dá espaço abaixo */
+            box-shadow: 0 0 20px var(--primary-color);
+            animation: pulseLogo 2s infinite;
+        }
+        @keyframes pulseLogo { 0% { box-shadow: 0 0 10px var(--primary-color); } 50% { box-shadow: 0 0 30px var(--primary-color); } 100% { box-shadow: 0 0 10px var(--primary-color); } }
+
     </style>
 </head>
 <body>
     <canvas id="particles-canvas"></canvas>
+    <video autoplay muted loop playsinline id="background-video">
+        <source src="https://cdn.pixabay.com/video/2020/03/11/33638-403638836_large.mp4" type="video/mp4">
+        Seu navegador não suporta o vídeo de fundo.
+    </video>
     <div id="notification-container" class="notification-container"></div>
+
+    <!-- Public Form View (Hidden by default) -->
+    <div id="public-view" class="public-container" style="display: none;">
+        
+        <!-- Floating Background Effects -->
+        <div class="floating-shape shape-1"></div>
+        <div class="floating-shape shape-2"></div>
+
+        <!-- Header Links (Site & Facebook) -->
+        <div class="public-header-links">
+            <a href="https://zandrix78.github.io/zandrix/" target="_blank" class="header-link-btn">🌐 Site Oficial</a>
+            <a href="https://www.facebook.com/people/Zandrixbr/61588314909280/?rdid=DIcBMNUhJNW8tATw&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1CS5ySSYZk%2F" target="_blank" class="header-link-btn">👍 Facebook</a>
+        </div>
+
+        <div class="wizard-card">
+            <!-- Header -->
+            <img src="https://i.imgur.com/w28Wu0f.png" class="wizard-logo" alt="Zandrix Logo">
+            <div class="progress-container">
+                <div class="progress-bar" id="wizard-progress"></div>
+            </div>
+            
+            <!-- Step 1: Intro / Name -->
+            <div class="wizard-step active" id="step-1">
+                <div class="wizard-title">Vamos decolar seu projeto! 🚀</div>
+                <div class="wizard-desc">Para começarmos, qual é o seu nome?</div>
+                <input type="text" class="wizard-input" id="pub-name" placeholder="Digite seu nome aqui...">
+                <button class="wizard-btn" onclick="nextStep(2)">Continuar ➤</button>
+            </div>
+
+            <!-- Step 2: Company Name -->
+            <div class="wizard-step" id="step-2">
+                <div class="wizard-title">Qual o nome da sua empresa ou projeto?</div>
+                <div class="wizard-desc">(Se não tiver, pode deixar em branco ou usar seu nome)</div>
+                <input type="text" class="wizard-input" id="pub-company" placeholder="Ex: Zandrix">
+                <button class="wizard-btn" onclick="nextStep(3)">Próximo ➤</button>
+                <button class="wizard-btn btn-secondary" onclick="prevStep(1)">Voltar</button>
+            </div>
+
+            <!-- Step 3: Age -->
+            <div class="wizard-step" id="step-3">
+                <div class="wizard-title">Qual a sua idade?</div>
+                <div class="wizard-desc">(Isso nos ajuda a entender melhor seu perfil)</div>
+                <input type="number" class="wizard-input" id="pub-age" placeholder="Ex: 25">
+                <button class="wizard-btn" onclick="nextStep(4)">Próximo ➤</button>
+                <button class="wizard-btn btn-secondary" onclick="prevStep(2)">Voltar</button>
+            </div>
+
+            <!-- Step 4: Contact -->
+            <div class="wizard-step" id="step-4">
+                <div class="wizard-title">Prazer, <span id="display-name" style="color:var(--primary-color)"></span>! 👋</div>
+                <div class="wizard-desc">Deixe seu WhatsApp e E-mail para contato.</div>
+                <input type="tel" class="wizard-input" id="pub-phone" placeholder="WhatsApp: (XX) 9XXXX-XXXX">
+                <input type="email" class="wizard-input" id="pub-email" placeholder="Seu melhor e-mail (opcional)">
+                <button class="wizard-btn" onclick="nextStep(5)">Próximo ➤</button>
+                <button class="wizard-btn btn-secondary" onclick="prevStep(3)">Voltar</button>
+            </div>
+
+            <!-- Step 5: Service Type -->
+            <div class="wizard-step" id="step-5">
+                <div class="wizard-title">O que você precisa? 💻</div>
+                <div class="wizard-desc">Selecione o tipo de projeto:</div>
+                
+                <div class="option-grid">
+                    <div class="option-card" onclick="selectOption('Site Institucional', this)">
+                        <div class="option-icon">🏢</div><div>Site Institucional</div>
+                    </div>
+                    <div class="option-card" onclick="selectOption('Landing Page', this)">
+                        <div class="option-icon">🚀</div><div>Landing Page (Vendas)</div>
+                    </div>
+                    <div class="option-card" onclick="selectOption('E-commerce', this)">
+                        <div class="option-icon">🛒</div><div>Loja Virtual</div>
+                    </div>
+                    <div class="option-card" onclick="selectOption('Design/Outros', this)">
+                        <div class="option-icon">🎨</div><div>Design / Outros</div>
+                    </div>
+                </div>
+                <input type="hidden" id="pub-service">
+                <br>
+                <button class="wizard-btn" onclick="nextStep(6)">Próximo ➤</button>
+                <button class="wizard-btn btn-secondary" onclick="prevStep(4)">Voltar</button>
+            </div>
+
+            <!-- Step 6: Details & Budget -->
+            <div class="wizard-step" id="step-6">
+                <div class="wizard-title">Detalhes Finais 📝</div>
+                <div class="wizard-desc">Conte um pouco mais sobre sua ideia e investimento.</div>
+                
+                <select class="wizard-input" id="pub-budget">
+                    <option value="" disabled selected>Investimento Aproximado</option>
+                    <option value="Até R$ 1.000">Até R$ 1.000</option>
+                    <option value="R$ 1.000 - R$ 3.000">R$ 1.000 - R$ 3.000</option>
+                    <option value="R$ 3.000+">Acima de R$ 3.000</option>
+                </select>
+
+                <textarea class="wizard-input" id="pub-details" rows="3" placeholder="Resumo do projeto (ex: site para advogados, cores escuras...)"></textarea>
+                
+                <button class="wizard-btn" onclick="sendPublicBudget()">✨ Finalizar e Enviar no WhatsApp</button>
+                <button class="wizard-btn btn-secondary" onclick="prevStep(5)">Voltar</button>
+            </div>
+
+            <!-- Step 7: Success -->
+            <div class="wizard-step" id="step-7">
+                <span class="success-checkmark">✓</span>
+                <div class="wizard-title">Enviado com Sucesso!</div>
+                <div class="wizard-desc">Sua solicitação foi enviada. Em breve, nossa equipe entrará em contato pelo WhatsApp. Obrigado!</div>
+            </div>
+
+            <div style="margin-top: 20px; font-size: 11px; color: #555;">ZANDRIX © Todos os direitos reservados.</div>
+        </div>
+    </div>
 
     <!-- Sidebar -->
     <div class="sidebar" id="owner-sidebar">
@@ -552,6 +799,7 @@
         <button class="nav-btn" onclick="showSection('projects')">🚀 Projetos</button>
         <button class="nav-btn" onclick="showSection('crm')">👥 Clientes (CRM)</button>
         <button class="nav-btn" onclick="showSection('meetings')">📹 Reuniões</button>
+        <button class="nav-btn" onclick="showSection('budget-requests')">📬 Orçamentos</button>
         <button class="nav-btn" onclick="showSection('renewals')">📅 Renovações</button>
         <button class="nav-btn" onclick="showSection('checklist')">✅ Checklist</button>
         <button class="nav-btn" onclick="showSection('notes')">📝 Anotações</button>
@@ -681,6 +929,31 @@
                 <ul class="sales-list" id="sales-history">
                     <!-- Lista preenchida via JS -->
                 </ul>
+            </div>
+        </div>
+
+        <!-- Budget Requests Section (NEW) -->
+        <div id="budget-requests" class="section">
+            <h2>Solicitações de Orçamento</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">
+                Gerencie os pedidos que chegam pelo link da bio. <br>
+                <small>⚠️ Nota: Como o sistema é offline, os pedidos do formulário chegam no seu WhatsApp. Registre-os aqui para manter o histórico.</small>
+            </p>
+
+            <div class="card">
+                <label>Registrar Novo Pedido</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <input type="text" id="req-name" placeholder="Nome do Cliente">
+                    <input type="text" id="req-phone" placeholder="WhatsApp">
+                    <input type="text" id="req-service" placeholder="Serviço Solicitado">
+                    <input type="text" id="req-details" placeholder="Detalhes">
+                </div>
+                <button class="action-btn" onclick="addBudgetRequest()">💾 Registrar Pedido</button>
+            </div>
+
+            <div class="card">
+                <label>Pedidos Recebidos</label>
+                <ul class="sales-list" id="budget-list"></ul>
             </div>
         </div>
 
@@ -1054,6 +1327,9 @@
                 <label>Acesso dos Sócios</label>
                 <button class="action-btn" onclick="copySocioLink()" style="background-color: #333; margin-bottom: 15px;">🔗 Copiar Link para Sócios</button>
 
+                <label>Link Público (Bio do Instagram)</label>
+                <button class="action-btn" onclick="copyPublicLink()" style="background-color: #25d366; color: white;">🔗 Copiar Link de Orçamento</button>
+
                 <button class="action-btn" onclick="saveSettings()">Salvar Alterações</button>
             </div>
         </div>
@@ -1224,6 +1500,193 @@
             });
 
             renderComparisonChart(monthsLabels, salesMonthly, expensesMonthly);
+        }
+
+        // --- Lógica de Pedidos de Orçamento (NEW) ---
+        let budgetRequests = JSON.parse(localStorage.getItem('zandrix_budgets')) || [];
+
+        function loadBudgetRequests() {
+            const list = document.getElementById('budget-list');
+            list.innerHTML = '';
+            
+            budgetRequests.slice().reverse().forEach(req => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div style="flex:1">
+                        <div style="font-weight:bold; color:white;">${req.name} <span style="font-size:11px; color:#888;">(Idade: ${req.age || 'N/A'})</span></div>
+                        <div style="font-size:12px; color:var(--primary-color);">${req.service}</div>
+                        <div style="font-size:12px; color:#aaa;">${req.details}</div>
+                        <div style="font-size:11px; color:#666;">📞 ${req.phone} | 📅 ${req.date}</div>
+                    </div>
+                    <button onclick="deleteBudgetRequest(${req.id})" style="background:none; border:none; cursor:pointer;">🗑️</button>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function addBudgetRequest(data = null) {
+            // Se data for passado (via formulário interno), usa ele. Se não, pega dos inputs.
+            let name, phone, service, details, age;
+
+            if (data) {
+                name = data.name;
+                phone = data.phone;
+                service = data.service;
+                details = data.details;
+                age = data.age;
+            } else {
+                name = document.getElementById('req-name').value;
+                phone = document.getElementById('req-phone').value;
+                service = document.getElementById('req-service').value;
+                details = document.getElementById('req-details').value;
+                age = 'N/A';
+            }
+
+            if (name) {
+                budgetRequests.push({
+                    id: Date.now(),
+                    name, phone, service, details, age,
+                    date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
+                });
+                localStorage.setItem('zandrix_budgets', JSON.stringify(budgetRequests));
+                
+                if(!data) {
+                    document.getElementById('req-name').value = '';
+                    document.getElementById('req-phone').value = '';
+                    document.getElementById('req-service').value = '';
+                    document.getElementById('req-details').value = '';
+                    showNotification("Pedido registrado!", "success");
+                }
+                loadBudgetRequests();
+            } else {
+                if(!data) showNotification("Nome é obrigatório.", "error");
+            }
+        }
+
+        function deleteBudgetRequest(id) {
+            if(confirm("Excluir este pedido?")) {
+                budgetRequests = budgetRequests.filter(r => r.id !== id);
+                localStorage.setItem('zandrix_budgets', JSON.stringify(budgetRequests));
+                loadBudgetRequests();
+            }
+        }
+
+        // --- WIZARD FORM LOGIC (NEW) ---
+        let currentStep = 1;
+        const totalSteps = 6;
+
+        function updateProgress() {
+            const percent = Math.min(((currentStep - 1) / (totalSteps - 1)) * 100, 100);
+            document.getElementById('wizard-progress').style.width = percent + '%';
+        }
+
+        function nextStep(step) {
+            // Validação simples
+            if (step === 2) { // Saindo do passo 1 (nome)
+                const name = document.getElementById('pub-name').value;
+                if (!name) return alert("Por favor, digite seu nome!");
+                document.getElementById('display-name').innerText = name; // Popula o nome para o passo 3
+            }
+            if (step === 5) { // Saindo do passo 4 (contato)
+                const phone = document.getElementById('pub-phone').value;
+                if (!phone) return alert("Por favor, digite seu WhatsApp!");
+            }
+            if (step === 6) { // Saindo do passo 5 (serviço)
+                const service = document.getElementById('pub-service').value;
+                if (!service) return alert("Selecione um serviço!");
+            }
+
+            // Esconder passo atual
+            document.querySelector('.wizard-step.active').classList.remove('active');
+            
+            // Mostrar próximo passo com delay pequeno para animação
+            setTimeout(() => {
+                document.getElementById(`step-${step}`).classList.add('active');
+            }, 100);
+
+            currentStep = step;
+            updateProgress();
+        }
+
+        function prevStep(step) {
+            document.querySelector('.wizard-step.active').classList.remove('active');
+            document.getElementById(`step-${step}`).classList.add('active');
+            currentStep = step;
+            updateProgress();
+        }
+
+        function selectOption(value, element) {
+            // Remove selected from others
+            document.querySelectorAll('.option-card').forEach(el => el.classList.remove('selected'));
+            // Add to clicked
+            element.classList.add('selected');
+            // Set hidden input
+            document.getElementById('pub-service').value = value;
+        }
+
+        // --- Lógica do Formulário Público (NEW) ---
+        function sendPublicBudget() {
+            const name = document.getElementById('pub-name').value;
+            const company = document.getElementById('pub-company').value;
+            const age = document.getElementById('pub-age').value;
+            const phone = document.getElementById('pub-phone').value;
+            const email = document.getElementById('pub-email').value;
+            const service = document.getElementById('pub-service').value;
+            const budget = document.getElementById('pub-budget').value || "Não informado";
+            const details = document.getElementById('pub-details').value;
+
+            // Salva backup local
+            const budgets = JSON.parse(localStorage.getItem('zandrix_public_sent')) || [];
+            budgets.push({ date: new Date().toISOString(), name, service });
+            localStorage.setItem('zandrix_public_sent', JSON.stringify(budgets));
+
+            // Configurar número do admin
+            const settings = JSON.parse(localStorage.getItem('zandrix_settings')) || {};
+            
+            // --- CORREÇÃO DO NÚMERO ---
+            // Usa o número das configurações SE existir, senão usa o número padrão solicitado: 33998154570
+            // Adiciona 55 (Brasil) se não tiver
+            let rawPhone = settings.whats ? settings.whats.replace(/\D/g, '') : '5533998154570';
+            if (rawPhone.length <= 11) rawPhone = '55' + rawPhone; // Adiciona código país se parecer local
+            
+            let text = `*NOVO ORÇAMENTO DO SITE (ZANDRIX)* 🚀%0A%0A` +
+                `👤 *Nome:* ${name}%0A`;
+            
+            if (company) {
+                text += `%0A🏢 *Empresa/Projeto:* ${company}`;
+            }
+
+            text += `%0A🎂 *Idade:* ${age}%0A` +
+                    `📱 *Contato:* ${phone}%0A`;
+
+            if (email) {
+                text += `%0A📧 *E-mail:* ${email}`;
+            }
+
+            text += `%0A%0A💻 *Serviço:* ${service}%0A` +
+                    `💰 *Investimento:* ${budget}%0A` +
+                    `📝 *Detalhes:* ${details}%0A%0A` +
+                    `_Enviado pelo Assistente Virtual Zandrix_`;
+
+            const url = `https://wa.me/${rawPhone}?text=${text}`;
+            
+            // Mostra a tela de sucesso e depois abre o WhatsApp
+            nextStep(7); // Vai para a tela de sucesso
+            
+            // Esconde os botões de voltar/avançar na tela de sucesso
+            document.getElementById('wizard-progress').style.width = '100%';
+            document.querySelectorAll('#step-7 .wizard-btn').forEach(b => b.style.display = 'none');
+
+            setTimeout(() => {
+                window.open(url, '_blank');
+            }, 1500); // Espera 1.5s antes de abrir o WhatsApp
+        }
+
+        function copyPublicLink() {
+            const url = window.location.href.split('?')[0] + '?mode=public';
+            navigator.clipboard.writeText(url).then(() => {
+                showNotification("Link do Formulário copiado!", "success");
+            });
         }
 
         function renderChart(data) {
@@ -2260,6 +2723,16 @@
                 document.getElementById('employee-dashboard').style.display = 'none';
                 showSection('dashboard');
 
+            } else if (mode === 'public') { // MODO PÚBLICO (Formulário)
+                // Esconde todo o sistema principal
+                document.getElementById('owner-sidebar').style.display = 'none';
+                document.getElementById('employee-sidebar').style.display = 'none';
+                document.getElementById('socio-sidebar').style.display = 'none';
+                document.querySelector('.main-content').style.display = 'none';
+                document.querySelector('.scroll-controls').style.display = 'none';
+                // Mostra apenas o formulário
+                document.getElementById('public-view').style.display = 'flex';
+
             } else { // MODO DONO (PADRÃO)
                 document.getElementById('employee-dashboard').style.display = 'none';
                 showSection('dashboard');
@@ -2322,6 +2795,7 @@
             loadRenewals();
             loadChecklist();
             loadClients();
+            loadBudgetRequests();
             loadMeetingLink();
             loadSettings();
             initParticles();
